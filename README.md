@@ -68,7 +68,7 @@ The mechanical structure of the Virgo OMAV platform (modeled as `AUV_USDF_V2`) f
 <p align="center">
   <img src="Virgo_UAV_PID_V2/video/coordinate_frames_morphquad.png" width="85%" alt="Virgo OMAV Coordinate Frames"/>
   <br/>
-  <em>Figure 2: Reference coordinate frame conventions: World Frame $\mathcal{W}$, Body Frame $\mathcal{B}$, and Propeller Frames $\mathcal{P}_1 \dots \mathcal{P}_4$.</em>
+  <em>Figure 2: Schematic of the drone highlighting coordinate framesand servo angles.</em>
 </p>
 
 ### 3.1. Reference Frames & Geometric Definitions
