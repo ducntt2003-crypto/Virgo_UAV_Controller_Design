@@ -1,0 +1,1 @@
+controller_joint_names: ['', 'ARM_MOTOR_1', 'SHAFT_MOTOR_1', 'PROP_1_1', 'PROP_1_2', 'ARM_MOTOR_2', 'SHAFT_MOTOR_2', 'PROP_2_1', 'PROP_2_2', 'ARM_MOTOR_3', 'SHAFT_MOTOR_3', 'PROP_3_1', 'PROP_3_2', 'ARM_MOTOR_4', 'SHAFT_MOTOR_4', 'PROP_4_1', 'PROP_4_2', ]

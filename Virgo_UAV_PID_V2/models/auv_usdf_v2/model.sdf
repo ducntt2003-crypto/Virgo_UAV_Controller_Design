@@ -1,0 +1,929 @@
+<sdf version='1.11'>
+  <model name='auv_usdf_v2'>
+    <pose>0 0 0.35 0 0 0</pose>
+    <self_collide>false</self_collide>
+    <static>false</static>
+    <link name='base_link'>
+      <inertial>
+        <pose>-1.7886414571677301e-11 1.9471077563337798e-06 0.0003594008518924 0 0 0</pose>
+        <mass>0.54326542756476504</mass>
+        <inertia>
+          <ixx>0.0017057219504901899</ixx>
+          <ixy>8.9001128104339496e-08</ixy>
+          <ixz>-4.97435520098103e-12</ixz>
+          <iyy>0.0058533940345126198</iyy>
+          <iyz>2.5135228993742399e-12</iyz>
+          <izz>0.0068203238231277497</izz>
+        </inertia>
+      </inertial>
+      <collision name='base_link_collision'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://auv_usdf_v2/meshes/BODY.STL</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name='base_link_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://auv_usdf_v2/meshes/BODY.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>0.990196109 1 1 1</diffuse>
+          <ambient>0.990196109 1 1 1</ambient>
+        </material>
+      </visual>
+    
+      <sensor name="imu_sensor" type="imu">
+        <gz_frame_id>base_link</gz_frame_id>
+        <always_on>1</always_on><update_rate>250</update_rate>
+        <imu>
+          <angular_velocity>
+            <x><noise type="gaussian"><mean>0.0</mean><stddev>0.00087</stddev></noise></x>
+            <y><noise type="gaussian"><mean>0.0</mean><stddev>0.00087</stddev></noise></y>
+            <z><noise type="gaussian"><mean>0.0</mean><stddev>0.00087</stddev></noise></z>
+          </angular_velocity>
+          <linear_acceleration>
+            <x><noise type="gaussian"><mean>0.0</mean><stddev>0.0064</stddev></noise></x>
+            <y><noise type="gaussian"><mean>0.0</mean><stddev>0.0064</stddev></noise></y>
+            <z><noise type="gaussian"><mean>0.0</mean><stddev>0.0064</stddev></noise></z>
+          </linear_acceleration>
+        </imu>
+      </sensor>
+      <sensor name="air_pressure_sensor" type="air_pressure">
+        <gz_frame_id>base_link</gz_frame_id>
+        <always_on>1</always_on><update_rate>50</update_rate>
+        <air_pressure><pressure><noise type="gaussian"><mean>0</mean><stddev>3</stddev></noise></pressure></air_pressure>
+      </sensor>
+      <sensor name="magnetometer_sensor" type="magnetometer">
+        <gz_frame_id>base_link</gz_frame_id>
+        <always_on>1</always_on><update_rate>100</update_rate>
+        <magnetometer>
+          <x><noise type="gaussian"><stddev>0.0001</stddev></noise></x>
+          <y><noise type="gaussian"><stddev>0.0001</stddev></noise></y>
+          <z><noise type="gaussian"><stddev>0.0001</stddev></noise></z>
+        </magnetometer>
+      </sensor>
+      <sensor name="navsat_sensor" type="navsat">
+        <gz_frame_id>base_link</gz_frame_id>
+        <always_on>1</always_on><update_rate>30</update_rate>
+      </sensor>
+</link>
+    <joint name='ARM_MOTOR_1_joint' type='revolute'>
+      <pose relative_to='base_link'>0.19724 -0.060947000000000001 0.016645 1.5708 -3.3881317890172014e-21 -3.4641000000000016e-05</pose>
+      <parent>base_link</parent>
+      <child>ARM_MOTOR_1_link</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <effort>0</effort>
+          <velocity>0</velocity>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.10000000000000001</damping>
+          <friction>0.10000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='ARM_MOTOR_1_link'>
+      <pose relative_to='ARM_MOTOR_1_joint'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>-0.0389784553103623 1.5313512411963e-05 0.10159442764177801 0 0 0</pose>
+        <mass>0.17121112121541801</mass>
+        <inertia>
+          <ixx>0.00068261857311527102</ixx>
+          <ixy>-1.6702386632645699e-08</ixy>
+          <ixz>8.7268282523630608e-06</ixz>
+          <iyy>0.0014386288552216101</iyy>
+          <iyz>3.1357988257908997e-08</iyz>
+          <izz>0.00078164284582659695</izz>
+        </inertia>
+      </inertial>
+      <visual name='ARM_MOTOR_1_link_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://auv_usdf_v2/meshes/ARM_MOTOR_1.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>0.990196109 1 1 1</diffuse>
+          <ambient>0.990196109 1 1 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='SHAFT_MOTOR_1_joint' type='revolute'>
+      <pose relative_to='ARM_MOTOR_1_link'>0.0017547000000000001 0 0.13685 -1.5707999999999998 3.4641000000000043e-05 6.0144000000000046e-05</pose>
+      <parent>ARM_MOTOR_1_link</parent>
+      <child>SHAFT_MOTOR_1_link</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <effort>0</effort>
+          <velocity>0</velocity>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.10000000000000001</damping>
+          <friction>0.10000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='SHAFT_MOTOR_1_link'>
+      <pose relative_to='SHAFT_MOTOR_1_joint'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>1.24852145289012e-09 4.4404064207914698e-05 6.6955309463434505e-08 0 0 0</pose>
+        <mass>0.039257682750033399</mass>
+        <inertia>
+          <ixx>3.01294455795419e-06</ixx>
+          <ixy>-2.4945301911640798e-13</ixy>
+          <ixz>5.6648058261265897e-14</ixz>
+          <iyy>2.8002655071980401e-05</iyy>
+          <iyz>-4.6176622857026602e-13</iyz>
+          <izz>2.99746221835832e-05</izz>
+        </inertia>
+      </inertial>
+      <visual name='SHAFT_MOTOR_1_link_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://auv_usdf_v2/meshes/SHAFT_MOTOR_1.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>0.990196109 1 1 1</diffuse>
+          <ambient>0.990196109 1 1 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='PROP_1_1_joint' type='revolute'>
+      <pose relative_to='SHAFT_MOTOR_1_link'>0 0.0001885 0.035700000000000003 0 0 0</pose>
+      <parent>SHAFT_MOTOR_1_link</parent>
+      <child>PROP_1_1_link</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.10000000000000001</damping>
+          <friction>0.10000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='PROP_1_1_link'>
+      <pose relative_to='PROP_1_1_joint'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>4.8736236649138398e-07 -1.2896456856870099e-06 -6.2451059771317902e-05 0 0 0</pose>
+        <mass>0.0099550653130241803</mass>
+        <inertia>
+          <ixx>9.4359360262694604e-06</ixx>
+          <ixy>-4.0597435529597898e-10</ixy>
+          <ixz>-2.0955052903914899e-11</ixz>
+          <iyy>9.4351282439867296e-06</iyy>
+          <iyz>3.1596725615110402e-11</iyz>
+          <izz>1.8771812692833799e-05</izz>
+        </inertia>
+      </inertial>
+      <visual name='PROP_1_1_link_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://auv_usdf_v2/meshes/PROP_1_1.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='PROP_1_2_joint' type='revolute'>
+      <pose relative_to='SHAFT_MOTOR_1_link'>0 0.0001885 -0.035700000000000003 0 0 0</pose>
+      <parent>SHAFT_MOTOR_1_link</parent>
+      <child>PROP_1_2_link</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.10000000000000001</damping>
+          <friction>0.10000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='PROP_1_2_link'>
+      <pose relative_to='PROP_1_2_joint'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>4.8736265470528096e-07 -1.2896597155198599e-06 -6.2451091512677497e-05 0 0 0</pose>
+        <mass>0.0099550653134191699</mass>
+        <inertia>
+          <ixx>9.4359360234458405e-06</ixx>
+          <ixy>-4.0597232784437599e-10</ixy>
+          <ixz>-2.09550594712506e-11</ixz>
+          <iyy>9.4351282286314605e-06</iyy>
+          <iyz>3.1597328652241802e-11</iyz>
+          <izz>1.8771812676583299e-05</izz>
+        </inertia>
+      </inertial>
+      <visual name='PROP_1_2_link_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://auv_usdf_v2/meshes/PROP_1_2.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='ARM_MOTOR_2_joint' type='revolute'>
+      <pose relative_to='base_link'>-0.19724 0.063630000000000006 0.016645 1.5708 -3.3881317890172014e-21 -3.4641000000000016e-05</pose>
+      <parent>base_link</parent>
+      <child>ARM_MOTOR_2_link</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <effort>0</effort>
+          <velocity>0</velocity>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.10000000000000001</damping>
+          <friction>0.10000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='ARM_MOTOR_2_link'>
+      <pose relative_to='ARM_MOTOR_2_joint'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0.038978582876035298 1.5313512411574401e-05 -0.097911927643986402 0 0 0</pose>
+        <mass>0.17121112121542201</mass>
+        <inertia>
+          <ixx>0.00068261857311527102</ixx>
+          <ixy>1.6702386643457999e-08</ixy>
+          <ixz>8.7268282523596693e-06</ixz>
+          <iyy>0.00143862885522164</iyy>
+          <iyz>-3.1357988258942801e-08</iyz>
+          <izz>0.00078164284582662698</izz>
+        </inertia>
+      </inertial>
+      <visual name='ARM_MOTOR_2_link_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://auv_usdf_v2/meshes/ARM_MOTOR_2.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>0.990196109 1 1 1</diffuse>
+          <ambient>0.990196109 1 1 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='SHAFT_MOTOR_2_joint' type='revolute'>
+      <pose relative_to='ARM_MOTOR_2_link'>-0.0017546 0 -0.13317000000000001 -1.5707999999999998 3.4641000000000036e-05 -6.0144000000000012e-05</pose>
+      <parent>ARM_MOTOR_2_link</parent>
+      <child>SHAFT_MOTOR_2_link</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <effort>0</effort>
+          <velocity>0</velocity>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.10000000000000001</damping>
+          <friction>0.10000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='SHAFT_MOTOR_2_link'>
+      <pose relative_to='SHAFT_MOTOR_2_joint'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>-1.24852161942357e-09 -4.4404064207789798e-05 6.6955309574456794e-08 0 0 0</pose>
+        <mass>0.039257682750033503</mass>
+        <inertia>
+          <ixx>3.01294455795419e-06</ixx>
+          <ixy>-2.49453019919076e-13</ixy>
+          <ixz>-5.6648058535204801e-14</ixz>
+          <iyy>2.8002655071980401e-05</iyy>
+          <iyz>4.6176622939391203e-13</iyz>
+          <izz>2.99746221835832e-05</izz>
+        </inertia>
+      </inertial>
+      <visual name='SHAFT_MOTOR_2_link_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://auv_usdf_v2/meshes/SHAFT_MOTOR_2.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>0.990196109 1 1 1</diffuse>
+          <ambient>0.990196109 1 1 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='PROP_2_1_joint' type='revolute'>
+      <pose relative_to='SHAFT_MOTOR_2_link'>0 -0.0001885 0.035700000000000003 0 0 0</pose>
+      <parent>SHAFT_MOTOR_2_link</parent>
+      <child>PROP_2_1_link</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.10000000000000001</damping>
+          <friction>0.10000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='PROP_2_1_link'>
+      <pose relative_to='PROP_2_1_joint'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>-4.8736265301219095e-07 -1.2896597268059799e-06 6.2451091512982795e-05 0 0 0</pose>
+        <mass>0.0099550653134181707</mass>
+        <inertia>
+          <ixx>9.4359360234468299e-06</ixx>
+          <ixy>4.05972326724634e-10</ixy>
+          <ixz>-2.0955059469672899e-11</ixz>
+          <iyy>9.4351282286281097e-06</iyy>
+          <iyz>-3.1597328298926402e-11</iyz>
+          <izz>1.8771812676580901e-05</izz>
+        </inertia>
+      </inertial>
+      <visual name='PROP_2_1_link_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://auv_usdf_v2/meshes/PROP_2_1.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='PROP_2_2_joint' type='revolute'>
+      <pose relative_to='SHAFT_MOTOR_2_link'>0 -0.0001885 -0.035700000000000003 0 0 0</pose>
+      <parent>SHAFT_MOTOR_2_link</parent>
+      <child>PROP_2_2_link</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.10000000000000001</damping>
+          <friction>0.10000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='PROP_2_2_link'>
+      <pose relative_to='PROP_2_2_joint'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>-4.8736236879509697e-07 -1.2896456930665299e-06 6.2451059772317103e-05 0 0 0</pose>
+        <mass>0.0099550653130249193</mass>
+        <inertia>
+          <ixx>9.43593602626727e-06</ixx>
+          <ixy>4.0597435448017402e-10</ixy>
+          <ixz>-2.0955052741874598e-11</ixz>
+          <iyy>9.43512824398459e-06</iyy>
+          <iyz>-3.1597893418541698e-11</iyz>
+          <izz>1.8771812692829401e-05</izz>
+        </inertia>
+      </inertial>
+      <visual name='PROP_2_2_link_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://auv_usdf_v2/meshes/PROP_2_2.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='ARM_MOTOR_3_joint' type='revolute'>
+      <pose relative_to='base_link'>0.19724 0.064630000000000007 0.016645 1.5708 -3.3881317890172014e-21 -3.4641000000000016e-05</pose>
+      <parent>base_link</parent>
+      <child>ARM_MOTOR_3_link</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <effort>0</effort>
+          <velocity>0</velocity>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.10000000000000001</damping>
+          <friction>0.10000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='ARM_MOTOR_3_link'>
+      <pose relative_to='ARM_MOTOR_3_joint'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>-0.038985366326793301 -1.5313512411740901e-05 -0.097909226890784407 0 0 0</pose>
+        <mass>0.17121112121542101</mass>
+        <inertia>
+          <ixx>0.00068261736436455204</ixx>
+          <ixy>1.67045591446175e-08</ixy>
+          <ixz>-8.7199675586884707e-06</ixz>
+          <iyy>0.00143862885522163</iyy>
+          <iyz>3.1356831005789897e-08</iyz>
+          <izz>0.000781644054577331</izz>
+        </inertia>
+      </inertial>
+      <visual name='ARM_MOTOR_3_link_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://auv_usdf_v2/meshes/ARM_MOTOR_3.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>0.990196109 1 1 1</diffuse>
+          <ambient>0.990196109 1 1 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='SHAFT_MOTOR_3_joint' type='revolute'>
+      <pose relative_to='ARM_MOTOR_3_link'>0.0017454 0 -0.13278999999999999 -1.5707999999999998 3.4641000000000036e-05 -6.0144000000000012e-05</pose>
+      <parent>ARM_MOTOR_3_link</parent>
+      <child>SHAFT_MOTOR_3_link</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <effort>0</effort>
+          <velocity>0</velocity>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.10000000000000001</damping>
+          <friction>0.10000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='SHAFT_MOTOR_3_link'>
+      <pose relative_to='SHAFT_MOTOR_3_joint'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>1.24852145289012e-09 4.4404064207789798e-05 6.6955309407923393e-08 0 0 0</pose>
+        <mass>0.039257682750033503</mass>
+        <inertia>
+          <ixx>3.01294455795419e-06</ixx>
+          <ixy>-2.4945435402446102e-13</ixy>
+          <ixz>5.6636745832757599e-14</ixz>
+          <iyy>2.8002655071977701e-05</iyy>
+          <iyz>-4.6176622959480605e-13</iyz>
+          <izz>2.9974622183580499e-05</izz>
+        </inertia>
+      </inertial>
+      <visual name='SHAFT_MOTOR_3_link_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://auv_usdf_v2/meshes/SHAFT_MOTOR_3.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>0.990196109 1 1 1</diffuse>
+          <ambient>0.990196109 1 1 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='PROP_3_1_joint' type='revolute'>
+      <pose relative_to='SHAFT_MOTOR_3_link'>0 0.0001885 0.035700000000000003 0 0 0</pose>
+      <parent>SHAFT_MOTOR_3_link</parent>
+      <child>PROP_3_1_link</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.10000000000000001</damping>
+          <friction>0.10000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='PROP_3_1_link'>
+      <pose relative_to='PROP_3_1_joint'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>-4.8736267194149395e-07 1.2896597070336001e-06 -6.2451091512705199e-05 0 0 0</pose>
+        <mass>0.0099550653134182401</mass>
+        <inertia>
+          <ixx>9.4359360234467706e-06</ixx>
+          <ixy>-4.0597233314759701e-10</ixy>
+          <ixz>2.0955059198784001e-11</ixz>
+          <iyy>9.4351282286367308e-06</iyy>
+          <iyz>-3.1597328758402801e-11</iyz>
+          <izz>1.87718126765895e-05</izz>
+        </inertia>
+      </inertial>
+      <visual name='PROP_3_1_link_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://auv_usdf_v2/meshes/PROP_3_1.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='PROP_3_2_joint' type='revolute'>
+      <pose relative_to='SHAFT_MOTOR_3_link'>0 0.0001885 -0.035700000000000003 0 0 0</pose>
+      <parent>SHAFT_MOTOR_3_link</parent>
+      <child>PROP_3_2_link</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.10000000000000001</damping>
+          <friction>0.10000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='PROP_3_2_link'>
+      <pose relative_to='PROP_3_2_joint'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>-4.8736235971902395e-07 1.2896456969869999e-06 -6.2451059770707307e-05 0 0 0</pose>
+        <mass>0.0099550653130234899</mass>
+        <inertia>
+          <ixx>9.4359360262668499e-06</ixx>
+          <ixy>-4.0597435380524298e-10</ixy>
+          <ixz>2.0955053016281101e-11</ixz>
+          <iyy>9.4351282439834702e-06</iyy>
+          <iyz>-3.1597893374752701e-11</iyz>
+          <izz>1.8771812692827999e-05</izz>
+        </inertia>
+      </inertial>
+      <visual name='PROP_3_2_link_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://auv_usdf_v2/meshes/PROP_3_2.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='ARM_MOTOR_4_joint' type='revolute'>
+      <pose relative_to='base_link'>-0.19724 -0.064630000000000007 0.016645 1.5708 -3.3881317890172014e-21 -3.4641000000000016e-05</pose>
+      <parent>base_link</parent>
+      <child>ARM_MOTOR_4_link</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <effort>0</effort>
+          <velocity>0</velocity>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.10000000000000001</damping>
+          <friction>0.10000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='ARM_MOTOR_4_link'>
+      <pose relative_to='ARM_MOTOR_4_joint'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0.0389853663267926 -1.5313512411740901e-05 0.097909226890784698 0 0 0</pose>
+        <mass>0.17121112121542001</mass>
+        <inertia>
+          <ixx>0.00068261736436456299</ixx>
+          <ixy>-1.67045591449621e-08</ixy>
+          <ixz>-8.7199675586849199e-06</ixz>
+          <iyy>0.00143862885522163</iyy>
+          <iyz>-3.1356831005616699e-08</iyz>
+          <izz>0.00078164405457732797</izz>
+        </inertia>
+      </inertial>
+      <visual name='ARM_MOTOR_4_link_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://auv_usdf_v2/meshes/ARM_MOTOR_4.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>0.990196109 1 1 1</diffuse>
+          <ambient>0.990196109 1 1 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='SHAFT_MOTOR_4_joint' type='revolute'>
+      <pose relative_to='ARM_MOTOR_4_link'>-0.0017454 0 0.13278999999999999 -1.5707999999999998 3.4641000000000043e-05 6.0144000000000046e-05</pose>
+      <parent>ARM_MOTOR_4_link</parent>
+      <child>SHAFT_MOTOR_4_link</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <effort>0</effort>
+          <velocity>0</velocity>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.10000000000000001</damping>
+          <friction>0.10000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='SHAFT_MOTOR_4_link'>
+      <pose relative_to='SHAFT_MOTOR_4_joint'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>-1.2485213973789701e-09 -4.4404064207859099e-05 6.6955309629967998e-08 0 0 0</pose>
+        <mass>0.039257682750033399</mass>
+        <inertia>
+          <ixx>3.01294455795419e-06</ixx>
+          <ixy>-2.4945435451906798e-13</ixy>
+          <ixz>-5.6636748324160898e-14</ixz>
+          <iyy>2.8002655071977701e-05</iyy>
+          <iyz>4.6176622831266398e-13</iyz>
+          <izz>2.9974622183580601e-05</izz>
+        </inertia>
+      </inertial>
+      <visual name='SHAFT_MOTOR_4_link_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://auv_usdf_v2/meshes/SHAFT_MOTOR_4.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>0.990196109 1 1 1</diffuse>
+          <ambient>0.990196109 1 1 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='PROP_4_1_joint' type='revolute'>
+      <pose relative_to='SHAFT_MOTOR_4_link'>0 -0.0001885 0.035700000000000003 0 0 0</pose>
+      <parent>SHAFT_MOTOR_4_link</parent>
+      <child>PROP_4_1_link</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.10000000000000001</damping>
+          <friction>0.10000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='PROP_4_1_link'>
+      <pose relative_to='PROP_4_1_joint'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>4.8736236513136099e-07 1.2896456886291001e-06 6.2451059771873e-05 0 0 0</pose>
+        <mass>0.00995506531302379</mass>
+        <inertia>
+          <ixx>9.4359360262653303e-06</ixx>
+          <ixy>4.0597435526946298e-10</ixy>
+          <ixz>2.09550528563221e-11</ixz>
+          <iyy>9.4351282439853794e-06</iyy>
+          <iyz>3.1597893554445902e-11</iyz>
+          <izz>1.87718126928283e-05</izz>
+        </inertia>
+      </inertial>
+      <visual name='PROP_4_1_link_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://auv_usdf_v2/meshes/PROP_4_1.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+    <joint name='PROP_4_2_joint' type='revolute'>
+      <pose relative_to='SHAFT_MOTOR_4_link'>0 -0.0001885 -0.035700000000000003 0 0 0</pose>
+      <parent>SHAFT_MOTOR_4_link</parent>
+      <child>PROP_4_2_link</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>-inf</lower>
+          <upper>inf</upper>
+        </limit>
+        <dynamics>
+          <damping>0.10000000000000001</damping>
+          <friction>0.10000000000000001</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+    <link name='PROP_4_2_link'>
+      <pose relative_to='PROP_4_2_joint'>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>4.8736266700100096e-07 1.2896597056388801e-06 6.2451091512177897e-05 0 0 0</pose>
+        <mass>0.0099550653134135199</mass>
+        <inertia>
+          <ixx>9.4359360234440702e-06</ixx>
+          <ixy>4.0597233170694001e-10</ixy>
+          <ixz>2.0955059255911101e-11</ixz>
+          <iyy>9.4351282286352993e-06</iyy>
+          <iyz>3.1597328720313002e-11</iyz>
+          <izz>1.87718126765854e-05</izz>
+        </inertia>
+      </inertial>
+      <visual name='PROP_4_2_link_visual'>
+        <pose>0 0 0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://auv_usdf_v2/meshes/PROP_4_2.STL</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <diffuse>0 0 0 1</diffuse>
+          <ambient>0 0 0 1</ambient>
+        </material>
+      </visual>
+    </link>
+  
+    <!-- ==================== 8 MULTICOPTER MOTOR PLUGINS ==================== -->
+    <!-- Arm 3 (Front-Left): Motors 0, 1 -->
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>PROP_3_1_joint</jointName><linkName>PROP_3_1_link</linkName><turningDirection>ccw</turningDirection>
+      <timeConstantUp>0.015</timeConstantUp><timeConstantDown>0.02</timeConstantDown><maxRotVelocity>1200</maxRotVelocity>
+      <motorConstant>8.548e-06</motorConstant><momentConstant>0.06</momentConstant>
+      <rotorDragCoefficient>0.0001</rotorDragCoefficient><rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <commandSubTopic>command/motor_speed</commandSubTopic><actuator_number>0</actuator_number>
+      <motorSpeedPubTopic>motor_speed/0</motorSpeedPubTopic><rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim><motorType>velocity</motorType>
+    </plugin>
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>PROP_3_2_joint</jointName><linkName>PROP_3_2_link</linkName><turningDirection>cw</turningDirection>
+      <timeConstantUp>0.015</timeConstantUp><timeConstantDown>0.02</timeConstantDown><maxRotVelocity>1200</maxRotVelocity>
+      <motorConstant>8.548e-06</motorConstant><momentConstant>0.06</momentConstant>
+      <rotorDragCoefficient>0.0001</rotorDragCoefficient><rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <commandSubTopic>command/motor_speed</commandSubTopic><actuator_number>1</actuator_number>
+      <motorSpeedPubTopic>motor_speed/1</motorSpeedPubTopic><rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim><motorType>velocity</motorType>
+    </plugin>
+
+    <!-- Arm 2 (Rear-Left): Motors 2, 3 -->
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>PROP_2_1_joint</jointName><linkName>PROP_2_1_link</linkName><turningDirection>ccw</turningDirection>
+      <timeConstantUp>0.015</timeConstantUp><timeConstantDown>0.02</timeConstantDown><maxRotVelocity>1200</maxRotVelocity>
+      <motorConstant>8.548e-06</motorConstant><momentConstant>0.06</momentConstant>
+      <rotorDragCoefficient>0.0001</rotorDragCoefficient><rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <commandSubTopic>command/motor_speed</commandSubTopic><actuator_number>2</actuator_number>
+      <motorSpeedPubTopic>motor_speed/2</motorSpeedPubTopic><rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim><motorType>velocity</motorType>
+    </plugin>
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>PROP_2_2_joint</jointName><linkName>PROP_2_2_link</linkName><turningDirection>cw</turningDirection>
+      <timeConstantUp>0.015</timeConstantUp><timeConstantDown>0.02</timeConstantDown><maxRotVelocity>1200</maxRotVelocity>
+      <motorConstant>8.548e-06</motorConstant><momentConstant>0.06</momentConstant>
+      <rotorDragCoefficient>0.0001</rotorDragCoefficient><rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <commandSubTopic>command/motor_speed</commandSubTopic><actuator_number>3</actuator_number>
+      <motorSpeedPubTopic>motor_speed/3</motorSpeedPubTopic><rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim><motorType>velocity</motorType>
+    </plugin>
+
+    <!-- Arm 4 (Rear-Right): Motors 4, 5 -->
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>PROP_4_1_joint</jointName><linkName>PROP_4_1_link</linkName><turningDirection>ccw</turningDirection>
+      <timeConstantUp>0.015</timeConstantUp><timeConstantDown>0.02</timeConstantDown><maxRotVelocity>1200</maxRotVelocity>
+      <motorConstant>8.548e-06</motorConstant><momentConstant>0.06</momentConstant>
+      <rotorDragCoefficient>0.0001</rotorDragCoefficient><rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <commandSubTopic>command/motor_speed</commandSubTopic><actuator_number>4</actuator_number>
+      <motorSpeedPubTopic>motor_speed/4</motorSpeedPubTopic><rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim><motorType>velocity</motorType>
+    </plugin>
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>PROP_4_2_joint</jointName><linkName>PROP_4_2_link</linkName><turningDirection>cw</turningDirection>
+      <timeConstantUp>0.015</timeConstantUp><timeConstantDown>0.02</timeConstantDown><maxRotVelocity>1200</maxRotVelocity>
+      <motorConstant>8.548e-06</motorConstant><momentConstant>0.06</momentConstant>
+      <rotorDragCoefficient>0.0001</rotorDragCoefficient><rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <commandSubTopic>command/motor_speed</commandSubTopic><actuator_number>5</actuator_number>
+      <motorSpeedPubTopic>motor_speed/5</motorSpeedPubTopic><rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim><motorType>velocity</motorType>
+    </plugin>
+
+    <!-- Arm 1 (Front-Right): Motors 6, 7 -->
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>PROP_1_1_joint</jointName><linkName>PROP_1_1_link</linkName><turningDirection>ccw</turningDirection>
+      <timeConstantUp>0.015</timeConstantUp><timeConstantDown>0.02</timeConstantDown><maxRotVelocity>1200</maxRotVelocity>
+      <motorConstant>8.548e-06</motorConstant><momentConstant>0.06</momentConstant>
+      <rotorDragCoefficient>0.0001</rotorDragCoefficient><rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <commandSubTopic>command/motor_speed</commandSubTopic><actuator_number>6</actuator_number>
+      <motorSpeedPubTopic>motor_speed/6</motorSpeedPubTopic><rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim><motorType>velocity</motorType>
+    </plugin>
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>PROP_1_2_joint</jointName><linkName>PROP_1_2_link</linkName><turningDirection>cw</turningDirection>
+      <timeConstantUp>0.015</timeConstantUp><timeConstantDown>0.02</timeConstantDown><maxRotVelocity>1200</maxRotVelocity>
+      <motorConstant>8.548e-06</motorConstant><momentConstant>0.06</momentConstant>
+      <rotorDragCoefficient>0.0001</rotorDragCoefficient><rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <commandSubTopic>command/motor_speed</commandSubTopic><actuator_number>7</actuator_number>
+      <motorSpeedPubTopic>motor_speed/7</motorSpeedPubTopic><rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim><motorType>velocity</motorType>
+    </plugin>
+
+    <!-- ==================== 8 GIMBAL SERVO CONTROLLERS ==================== -->
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>ARM_MOTOR_3_joint</joint_name><sub_topic>servo_0</sub_topic><p_gain>45.0</p_gain><d_gain>1.2</d_gain><i_gain>0.0</i_gain><cmd_max>8.0</cmd_max><cmd_min>-8.0</cmd_min>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>SHAFT_MOTOR_3_joint</joint_name><sub_topic>servo_1</sub_topic><p_gain>45.0</p_gain><d_gain>1.2</d_gain><i_gain>0.0</i_gain><cmd_max>8.0</cmd_max><cmd_min>-8.0</cmd_min>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>ARM_MOTOR_2_joint</joint_name><sub_topic>servo_2</sub_topic><p_gain>45.0</p_gain><d_gain>1.2</d_gain><i_gain>0.0</i_gain><cmd_max>8.0</cmd_max><cmd_min>-8.0</cmd_min>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>SHAFT_MOTOR_2_joint</joint_name><sub_topic>servo_3</sub_topic><p_gain>45.0</p_gain><d_gain>1.2</d_gain><i_gain>0.0</i_gain><cmd_max>8.0</cmd_max><cmd_min>-8.0</cmd_min>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>ARM_MOTOR_4_joint</joint_name><sub_topic>servo_4</sub_topic><p_gain>45.0</p_gain><d_gain>1.2</d_gain><i_gain>0.0</i_gain><cmd_max>8.0</cmd_max><cmd_min>-8.0</cmd_min>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>SHAFT_MOTOR_4_joint</joint_name><sub_topic>servo_5</sub_topic><p_gain>45.0</p_gain><d_gain>1.2</d_gain><i_gain>0.0</i_gain><cmd_max>8.0</cmd_max><cmd_min>-8.0</cmd_min>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>ARM_MOTOR_1_joint</joint_name><sub_topic>servo_6</sub_topic><p_gain>45.0</p_gain><d_gain>1.2</d_gain><i_gain>0.0</i_gain><cmd_max>8.0</cmd_max><cmd_min>-8.0</cmd_min>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>SHAFT_MOTOR_1_joint</joint_name><sub_topic>servo_7</sub_topic><p_gain>45.0</p_gain><d_gain>1.2</d_gain><i_gain>0.0</i_gain><cmd_max>8.0</cmd_max><cmd_min>-8.0</cmd_min>
+    </plugin>
+</model>
+</sdf>

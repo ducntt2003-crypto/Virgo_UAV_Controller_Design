@@ -1,0 +1,666 @@
+diff --git a/ROMFS/px4fmu_common/init.d-posix/airframes/4027_gz_virgo b/ROMFS/px4fmu_common/init.d-posix/airframes/4027_gz_virgo
+new file mode 100644
+index 0000000000..9826ebf67a
+--- /dev/null
++++ b/ROMFS/px4fmu_common/init.d-posix/airframes/4027_gz_virgo
+@@ -0,0 +1,182 @@
++#!/bin/sh
++#
++# @name Virgo OMAV (H-Frame Omnidirectional Multi-Rotor UAV)
++#
++# @type Omnidirectional Multirotor
++#
++
++. ${R}etc/init.d/rc.mc_defaults
++
++PX4_SIMULATOR=${PX4_SIMULATOR:=gz}
++PX4_GZ_WORLD=${PX4_GZ_WORLD:=default}
++PX4_SIM_MODEL=${PX4_SIM_MODEL:=virgo}
++export PX4_GZ_MODEL_POSE="0,0,0.35,0,0,1.5707963"
++
++param set-default SIM_GZ_EN 1
++
++# Virgo OMAV Airframe Index (CA_AIRFRAME = 18)
++param set-default CA_AIRFRAME 18
++param set-default CA_TILTING_TYPE 1
++
++# Direct Horizontal Force & Velocity Controller Tuning (Fully-Actuated H-Frame)
++param set-default MC_MAX_FXY 4.0
++param set-default MC_DES_PITCH_MAX 45.0
++param set-default MC_DES_PITCH_MIN -45.0
++param set-default MC_DES_ROLL_MAX 45.0
++param set-default MC_DES_ROLL_MIN -45.0
++
++# Position & Velocity Stiff Gains (Anti-Drift & Anti-Windup Pipeline)
++param set-default MPC_XY_P 1.6
++param set-default MPC_XY_VEL_P_ACC 2.2
++param set-default MPC_XY_VEL_I_ACC 0.12
++param set-default MPC_XY_VEL_D_ACC 0.30
++param set-default MPC_XY_ERR_MAX 1.0
++param set-default MPC_ACC_HOR_MAX 1.5
++param set-default MPC_JERK_AUTO 3.0
++param set-default MPC_Z_P 1.4
++param set-default MPC_Z_VEL_P_ACC 4.5
++
++# Rate & Attitude Controller Gains (Tuned for Hybrid Coaxial + Servo Vectoring)
++param set-default MC_ROLL_P 6.8
++param set-default MC_PITCH_P 6.8
++param set-default MC_YAW_P 2.6
++param set-default MC_YAW_WEIGHT 0.6
++param set-default MC_ROLLRATE_P 0.16
++param set-default MC_PITCHRATE_P 0.16
++param set-default MC_ROLLRATE_I 0.15
++param set-default MC_PITCHRATE_I 0.15
++param set-default MC_ROLLRATE_D 0.003
++param set-default MC_PITCHRATE_D 0.003
++param set-default MC_YAWRATE_P 0.16
++param set-default MC_YAWRATE_I 0.025
++param set-default MC_YAWRATE_D 0.003
++param set-default MC_YR_INT_LIM 0.15
++param set-default MC_YAWRATE_MAX 120.0
++param set-default MC_YAW_TQ_CUTOFF 30.0
++
++param set-default CA_ROTOR_COUNT 8
++param set-default CA_SV_CS_COUNT 8
++
++# ==============================================================================
++# Square Symmetric Frame Geometry: Lx = 0.25m, Ly = 0.25m
++# ==============================================================================
++# Arm 0: Front-Left (+0.25, +0.25, 0.0)
++param set-default CA_ROTOR0_PX 0.25
++param set-default CA_ROTOR0_PY 0.25
++param set-default CA_ROTOR0_PZ 0.0
++param set-default CA_ROTOR0_KM 0.05
++
++param set-default CA_ROTOR1_PX 0.25
++param set-default CA_ROTOR1_PY 0.25
++param set-default CA_ROTOR1_PZ 0.0
++param set-default CA_ROTOR1_KM -0.05
++
++# Arm 1: Back-Left (-0.25, +0.25, 0.0)
++param set-default CA_ROTOR2_PX -0.25
++param set-default CA_ROTOR2_PY 0.25
++param set-default CA_ROTOR2_PZ 0.0
++param set-default CA_ROTOR2_KM 0.05
++
++param set-default CA_ROTOR3_PX -0.25
++param set-default CA_ROTOR3_PY 0.25
++param set-default CA_ROTOR3_PZ 0.0
++param set-default CA_ROTOR3_KM -0.05
++
++# Arm 2: Back-Right (-0.25, -0.25, 0.0)
++param set-default CA_ROTOR4_PX -0.25
++param set-default CA_ROTOR4_PY -0.25
++param set-default CA_ROTOR4_PZ 0.0
++param set-default CA_ROTOR4_KM 0.05
++
++param set-default CA_ROTOR5_PX -0.25
++param set-default CA_ROTOR5_PY -0.25
++param set-default CA_ROTOR5_PZ 0.0
++param set-default CA_ROTOR5_KM -0.05
++
++# Arm 3: Front-Right (+0.25, -0.25, 0.0)
++param set-default CA_ROTOR6_PX 0.25
++param set-default CA_ROTOR6_PY -0.25
++param set-default CA_ROTOR6_PZ 0.0
++param set-default CA_ROTOR6_KM 0.05
++
++param set-default CA_ROTOR7_PX 0.25
++param set-default CA_ROTOR7_PY -0.25
++param set-default CA_ROTOR7_PZ 0.0
++param set-default CA_ROTOR7_KM -0.05
++
++# Map ESC channels to Gazebo Motor Model (101..108)
++param set-default SIM_GZ_EC_FUNC1 101
++param set-default SIM_GZ_EC_FUNC2 102
++param set-default SIM_GZ_EC_FUNC3 103
++param set-default SIM_GZ_EC_FUNC4 104
++param set-default SIM_GZ_EC_FUNC5 105
++param set-default SIM_GZ_EC_FUNC6 106
++param set-default SIM_GZ_EC_FUNC7 107
++param set-default SIM_GZ_EC_FUNC8 108
++
++param set-default SIM_GZ_EC_MIN1 100
++param set-default SIM_GZ_EC_MIN2 100
++param set-default SIM_GZ_EC_MIN3 100
++param set-default SIM_GZ_EC_MIN4 100
++param set-default SIM_GZ_EC_MIN5 100
++param set-default SIM_GZ_EC_MIN6 100
++param set-default SIM_GZ_EC_MIN7 100
++param set-default SIM_GZ_EC_MIN8 100
++
++param set-default SIM_GZ_EC_MAX1 1200
++param set-default SIM_GZ_EC_MAX2 1200
++param set-default SIM_GZ_EC_MAX3 1200
++param set-default SIM_GZ_EC_MAX4 1200
++param set-default SIM_GZ_EC_MAX5 1200
++param set-default SIM_GZ_EC_MAX6 1200
++param set-default SIM_GZ_EC_MAX7 1200
++param set-default SIM_GZ_EC_MAX8 1200
++
++# Map 8 Servos to Gazebo JointPositionController (channels 201..208)
++param set-default SIM_GZ_SV_FUNC1 201
++param set-default SIM_GZ_SV_MINA1 -90
++param set-default SIM_GZ_SV_MAXA1 90
++
++param set-default SIM_GZ_SV_FUNC2 202
++param set-default SIM_GZ_SV_MINA2 -90
++param set-default SIM_GZ_SV_MAXA2 90
++
++param set-default SIM_GZ_SV_FUNC3 203
++param set-default SIM_GZ_SV_MINA3 -90
++param set-default SIM_GZ_SV_MAXA3 90
++
++param set-default SIM_GZ_SV_FUNC4 204
++param set-default SIM_GZ_SV_MINA4 -90
++param set-default SIM_GZ_SV_MAXA4 90
++
++param set-default SIM_GZ_SV_FUNC5 205
++param set-default SIM_GZ_SV_MINA5 -90
++param set-default SIM_GZ_SV_MAXA5 90
++
++param set-default SIM_GZ_SV_FUNC6 206
++param set-default SIM_GZ_SV_MINA6 -90
++param set-default SIM_GZ_SV_MAXA6 90
++
++param set-default SIM_GZ_SV_FUNC7 207
++param set-default SIM_GZ_SV_MINA7 -90
++param set-default SIM_GZ_SV_MAXA7 90
++
++param set-default SIM_GZ_SV_FUNC8 208
++param set-default SIM_GZ_SV_MINA8 -90
++param set-default SIM_GZ_SV_MAXA8 90
++
++# Flight performance tuning
++param set-default MPC_THR_HOVER 0.35
++param set-default MPC_THR_MIN 0.10
++param set-default MPC_THR_MAX 0.85
++param set-default MPC_Z_VEL_MAX_UP 2.0
++param set-default MPC_Z_VEL_MAX_DN 1.5
++param set-default MPC_TKO_SPEED 1.2
++param set-default NAV_DLL_ACT 0
++param set-default NAV_RCL_ACT 0
++param set-default COM_RCL_EXCEPT 4
++param set-default COM_RC_IN_MODE 1
++param set-default CBRK_SUPPLY_CHK 894281
++param set-default CBRK_IO_SAFETY 22027
++param set-default COM_ARM_WO_GPS 1
++param set-default EKF2_MAG_TYPE 1
+diff --git a/src/modules/control_allocator/VehicleActuatorEffectiveness/ActuatorEffectivenessVirgo.cpp b/src/modules/control_allocator/VehicleActuatorEffectiveness/ActuatorEffectivenessVirgo.cpp
+new file mode 100644
+index 0000000000..849f95395a
+--- /dev/null
++++ b/src/modules/control_allocator/VehicleActuatorEffectiveness/ActuatorEffectivenessVirgo.cpp
+@@ -0,0 +1,298 @@
++/****************************************************************************
++ *
++ *   Copyright (c) 2026 PX4 Development Team. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in
++ *    the documentation and/or other materials provided with the
++ *    distribution.
++ * 3. Neither the name PX4 nor the names of its contributors may be
++ *    used to endorse or promote products derived from this software
++ *    without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
++ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
++ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
++ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
++ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
++ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
++ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
++ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
++ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ *
++ ****************************************************************************/
++
++/**
++ * @file ActuatorEffectivenessVirgo.cpp
++ *
++ * Actuator effectiveness for Virgo OMAV: H-Frame Omnidirectional Multi-Rotor UAV
++ * with 4 Coaxial Counter-Rotating Rotor Pairs and 8 Independent 2-DOF Gimbal Servos.
++ *
++ * Mathematical derivation: Closed-form energy-optimal control allocation adapted
++ * to rectangular H-Frame geometry (Lx = 0.28m, Ly = 0.22m).
++ */
++
++#include "ActuatorEffectivenessVirgo.hpp"
++#include <px4_platform_common/log.h>
++#include <cmath>
++
++using namespace matrix;
++
++ActuatorEffectivenessVirgo::ActuatorEffectivenessVirgo(ModuleParams *parent)
++	: ModuleParams(parent)
++{
++	_param_rotor_count = param_find("CA_ROTOR_COUNT");
++	_param_thr_hover   = param_find("MPC_THR_HOVER");
++	_param_thr_min     = param_find("MPC_THR_MIN");
++	_param_thr_max     = param_find("MPC_THR_MAX");
++
++	updateParams();
++}
++
++ActuatorEffectivenessVirgo::~ActuatorEffectivenessVirgo()
++{
++	delete _rotors;
++}
++
++void ActuatorEffectivenessVirgo::updateParams()
++{
++	ModuleParams::updateParams();
++
++	if (_param_rotor_count != PARAM_INVALID) {
++		param_get(_param_rotor_count, &_rotor_count);
++	}
++
++	if (_param_thr_hover != PARAM_INVALID) {
++		param_get(_param_thr_hover, &_hover_throttle);
++	}
++
++	if (_param_thr_min != PARAM_INVALID) {
++		param_get(_param_thr_min, &_min_throttle);
++	}
++
++	if (_param_thr_max != PARAM_INVALID) {
++		param_get(_param_thr_max, &_max_throttle);
++	}
++
++	if (!_rotors) {
++		_rotors = new ActuatorEffectivenessRotors(this, ActuatorEffectivenessRotors::AxisConfiguration::FixedUpwards);
++	}
++
++	_r = sqrtf(_lx * _lx + _ly * _ly);
++}
++
++bool ActuatorEffectivenessVirgo::getEffectivenessMatrix(Configuration &configuration,
++		EffectivenessUpdateReason external_update)
++{
++	if (external_update == EffectivenessUpdateReason::NO_EXTERNAL_UPDATE) {
++		return false;
++	}
++
++	// 1. Add Rotors (8 motors: 4 co-axial pairs)
++	bool rotors_added = _rotors && _rotors->addActuators(configuration);
++
++	_first_servo_idx = configuration.num_actuators_matrix[0];
++
++	// 2. Add 8 Gimbal Servos (2 per arm)
++	// Arm 0: alpha_0 (Pitch), beta_0 (Roll)
++	// Arm 1: alpha_1 (Pitch), beta_1 (Roll)
++	// Arm 2: alpha_2 (Pitch), beta_2 (Roll)
++	// Arm 3: alpha_3 (Pitch), beta_3 (Roll)
++	for (int i = 0; i < 8; ++i) {
++		configuration.addActuator(ActuatorType::SERVOS, Vector3f{}, Vector3f{});
++	}
++
++	return rotors_added;
++}
++
++void ActuatorEffectivenessVirgo::updateSetpoint(const matrix::Vector<float, NUM_AXES> &control_sp,
++		int matrix_index,
++		ActuatorVector &actuator_sp,
++		const ActuatorVector &actuator_min,
++		const ActuatorVector &actuator_max)
++{
++	const hrt_abstime now_us = hrt_absolute_time();
++	const float dt = (_last_update_us > 0) ? math::constrain((now_us - _last_update_us) * 1e-6f, 0.001f, 0.05f) : 0.004f;
++	_last_update_us = now_us;
++
++	// -------------------------------------------------------------------------
++	// 1. Convert Control Setpoint from PX4 FRD to Paper FLU (Section II)
++	// -------------------------------------------------------------------------
++	// PX4 FRD:
++	//   control_sp(0): tau_x (Roll, right = +)
++	//   control_sp(1): tau_y (Pitch, nose up = +)
++	//   control_sp(2): tau_z (Yaw, clockwise = +)
++	//   control_sp(3): fx (Forward = +)
++	//   control_sp(4): fy (Right = +)
++	//   control_sp(5): fz (Down = +, hover thrust is negative!)
++	//
++	// Paper FLU:
++	//   fx_flu = fx_frd
++	//   fy_flu = -fy_frd (Left = +)
++	//   fz_flu = -fz_frd (Up = +)
++	//   tau_x_flu = tau_x_frd
++	//   tau_y_flu = -tau_y_frd
++	//   tau_z_flu = -tau_z_frd
++	const float fx_flu    = control_sp(3);
++	const float fy_flu    = -control_sp(4);
++	const float fz_flu    = -control_sp(5);
++
++	const float tau_x_flu = control_sp(0);
++	const float tau_y_flu = -control_sp(1);
++	const float tau_z_flu = -control_sp(2);
++
++	const Vector3f fd_flu{fx_flu, fy_flu, fz_flu};
++	const Vector3f kB{0.0f, 0.0f, 1.0f};
++
++	// Tangential unit vectors for yaw torque for H-Frame:
++	// Arm 0 (Front-Left:  +lx, +ly): [-ly/r,  lx/r, 0]
++	// Arm 1 (Back-Left:   -lx, +ly): [-ly/r, -lx/r, 0]
++	// Arm 2 (Back-Right:  -lx, -ly): [ ly/r, -lx/r, 0]
++	// Arm 3 (Front-Right: +lx, -ly): [ ly/r,  lx/r, 0]
++	const Vector3f t_psi[4] = {
++		Vector3f{-_ly / _r,  _lx / _r, 0.0f},
++		Vector3f{-_ly / _r, -_lx / _r, 0.0f},
++		Vector3f{ _ly / _r, -_lx / _r, 0.0f},
++		Vector3f{ _ly / _r,  _lx / _r, 0.0f}
++	};
++
++	// -------------------------------------------------------------------------
++	// 2. Closed-Form Energy-Optimal Wrench Allocation (Adapted for H-Frame)
++	// Scaling normalized PX4 torques [-1, 1] by nominal arm hover thrust and arm spans.
++	// -------------------------------------------------------------------------
++	const float arm_hover = 0.25f * _hover_throttle;
++	const float tau_x_scaled = tau_x_flu * (arm_hover / _ly);
++	const float tau_y_scaled = tau_y_flu * (arm_hover / _lx);
++	// Dedicated Yaw Control via Coaxial Counter-Rotating Motor Reaction Torque:
++	// Eliminates slow-servo vs fast-motor phase-lag conflict and cross-axis X/Y force leakage.
++	// Servos are reserved 100% for decoupled translation (Fx, Fy) and tilt attitude decoupling.
++	const float tau_z_scaled = 0.0f;
++
++	Vector3f t[4];
++
++	// Arm 0: Front-Left (+lx, +ly)
++	t[0] = fd_flu * 0.25f
++	       + kB * ( tau_x_scaled * 0.25f)
++	       + kB * (-tau_y_scaled * 0.25f)
++	       + t_psi[0] * (tau_z_scaled * 0.25f);
++
++	// Arm 1: Back-Left (-lx, +ly)
++	t[1] = fd_flu * 0.25f
++	       + kB * ( tau_x_scaled * 0.25f)
++	       + kB * ( tau_y_scaled * 0.25f)
++	       + t_psi[1] * (tau_z_scaled * 0.25f);
++
++	// Arm 2: Back-Right (-lx, -ly)
++	t[2] = fd_flu * 0.25f
++	       + kB * (-tau_x_scaled * 0.25f)
++	       + kB * ( tau_y_scaled * 0.25f)
++	       + t_psi[2] * (tau_z_scaled * 0.25f);
++
++	// Arm 3: Front-Right (+lx, -ly)
++	t[3] = fd_flu * 0.25f
++	       + kB * (-tau_x_scaled * 0.25f)
++	       + kB * (-tau_y_scaled * 0.25f)
++	       + t_psi[3] * (tau_z_scaled * 0.25f);
++
++	// Mode gating: lock servos strictly upright (0°) during ground ops, takeoff, and landing
++	vehicle_land_detected_s land_detected{};
++	_vehicle_land_detected_sub.copy(&land_detected);
++
++	vehicle_local_position_s local_pos{};
++	_vehicle_local_position_sub.copy(&local_pos);
++
++	const float alt = -local_pos.z;
++	// Ground contact gating: on ground (alt < 0.06m) zero differential torque to prevent scrubbing
++	const bool is_on_ground = land_detected.landed || (local_pos.z_valid && alt < 0.06f);
++	// Upright servo gating: lock servos upright only when on ground or immediately prior to touchdown (< 0.12m)
++	const bool lock_servos_upright = land_detected.landed || (local_pos.z_valid && alt < 0.12f);
++
++	// -------------------------------------------------------------------------
++	// 3. Extract Rotor Speeds & Gimbal Angles (Eq. 14, 15)
++	// -------------------------------------------------------------------------
++	for (int i = 0; i < 4; ++i) {
++		const float T_mag = t[i].norm();
++
++		float alpha_i = 0.0f;
++		float beta_i  = 0.0f;
++
++		// Keep upright (alpha=0, beta=0) on the ground, during takeoff, or during idle
++		if (!lock_servos_upright && T_mag > 0.03f && t[i](2) > 0.01f) {
++			const Vector3f t_hat = t[i] / T_mag;
++
++			// Roll angle beta: beta = -asin(t_hat_y)
++			const float t_hat_y_clamped = math::constrain(t_hat(1), -0.999f, 0.999f);
++			beta_i = -asinf(t_hat_y_clamped);
++
++			const float cos_beta = cosf(beta_i);
++
++			if (fabsf(cos_beta) > 1e-3f) {
++				const float sin_alpha_ratio = math::constrain(t_hat(0) / cos_beta, -1.0f, 1.0f);
++				alpha_i = asinf(sin_alpha_ratio);
++			}
++		}
++
++		// Gimbal Lock mitigation:
++		// If |beta| > 80 deg, apply hybrid differential thrust for yaw authority
++		float yaw_differential = 0.0f;
++		if (fabsf(beta_i) > 1.4f) {
++			yaw_differential = math::constrain(tau_z_flu / (2.0f * _r), -0.1f, 0.1f);
++			if (i == 1 || i == 2) yaw_differential = -yaw_differential;
++		}
++
++		// ---------------------------------------------------------------------
++		// 4. Map to Physical Actuators (FRD Gazebo Convention) with Phase-Lead
++		// ---------------------------------------------------------------------
++		// Servo Phase-Lead Compensator: overcomes mechanical gearbox and pod inertia lag
++		const float alpha_dot = (alpha_i - _alpha_prev[i]) / dt;
++		const float beta_dot  = (beta_i  - _beta_prev[i])  / dt;
++		_alpha_prev[i] = alpha_i;
++		_beta_prev[i]  = beta_i;
++
++		const float tau_lead = 0.045f; // 45ms anticipatory phase advance
++		const float alpha_lead = alpha_i + tau_lead * math::constrain(alpha_dot, -10.0f, 10.0f);
++		const float beta_lead  = beta_i  + tau_lead * math::constrain(beta_dot,  -10.0f, 10.0f);
++
++		const float joint_pitch = math::constrain(alpha_lead, -M_PI_2_F, M_PI_2_F);
++		const float joint_roll  = math::constrain(beta_lead,  -M_PI_2_F, M_PI_2_F);
++
++		// Servos are mapped to channels 201..208:
++		const int s_pitch_idx = _first_servo_idx + 2 * i;
++		const int s_roll_idx  = _first_servo_idx + 2 * i + 1;
++
++		if (s_roll_idx < NUM_ACTUATORS) {
++			// Output normalized to [-1, 1] representing [-pi/2, +pi/2]
++			actuator_sp(s_pitch_idx) = joint_pitch / M_PI_2_F;
++			actuator_sp(s_roll_idx)  = joint_roll  / M_PI_2_F;
++		}
++
++		// Co-Axial Motor pair throttle:
++		const float nominal_arm_scale = 0.25f;
++		float throttle = (T_mag / nominal_arm_scale) + yaw_differential;
++		throttle = math::constrain(throttle, _min_throttle, _max_throttle);
++
++		// Fast Instantaneous Reaction Torque for Coaxial Pairs (Zero Servo Delay):
++		// control_sp(2) is PX4 FRD Yaw torque (+ = Clockwise).
++		// Upper motor (m0: CCW) reaction torque is Clockwise (+).
++		// Lower motor (m1: CW) reaction torque is Counter-Clockwise (-).
++		// Active coaxial reaction torque activates as soon as landing gear clears ground (alt >= 0.06m)
++		const float yaw_rotor_diff = is_on_ground ? 0.0f : math::constrain(control_sp(2) * 0.25f, -0.30f, 0.30f);
++
++		const int m0_idx = 2 * i;     // Upper rotor (CCW)
++		const int m1_idx = 2 * i + 1; // Lower rotor (CW)
++
++		if (m1_idx < _first_servo_idx) {
++			actuator_sp(m0_idx) = math::constrain(throttle + yaw_rotor_diff, _min_throttle, _max_throttle);
++			actuator_sp(m1_idx) = math::constrain(throttle - yaw_rotor_diff, _min_throttle, _max_throttle);
++		}
++	}
++}
+diff --git a/src/modules/control_allocator/VehicleActuatorEffectiveness/ActuatorEffectivenessVirgo.hpp b/src/modules/control_allocator/VehicleActuatorEffectiveness/ActuatorEffectivenessVirgo.hpp
+new file mode 100644
+index 0000000000..d5805c67f9
+--- /dev/null
++++ b/src/modules/control_allocator/VehicleActuatorEffectiveness/ActuatorEffectivenessVirgo.hpp
+@@ -0,0 +1,99 @@
++/****************************************************************************
++ *
++ *   Copyright (c) 2026 PX4 Development Team. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in
++ *    the documentation and/or other materials provided with the
++ *    distribution.
++ * 3. Neither the name PX4 nor the names of its contributors may be
++ *    used to endorse or promote products derived from this software
++ *    without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
++ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
++ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
++ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
++ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
++ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
++ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
++ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
++ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ *
++ ****************************************************************************/
++
++/**
++ * @file ActuatorEffectivenessVirgo.hpp
++ *
++ * Actuator effectiveness for Virgo OMAV: H-Frame Omnidirectional Multi-Rotor UAV
++ * with 4 Coaxial Counter-Rotating Rotor Pairs and 8 Independent 2-DOF Gimbal Servos.
++ *
++ * Mathematical derivation based on closed-form energy-optimal control allocation:
++ * Y. Aboudorra et al. (arXiv:2505.18270v1) adapted to H-Frame rectangular geometry (Lx != Ly).
++ */
++
++#pragma once
++
++#include "ActuatorEffectiveness.hpp"
++#include "ActuatorEffectivenessRotors.hpp"
++#include <uORB/Subscription.hpp>
++#include <uORB/topics/vehicle_land_detected.h>
++#include <uORB/topics/vehicle_local_position.h>
++
++class ActuatorEffectivenessVirgo : public ModuleParams, public ActuatorEffectiveness
++{
++public:
++	ActuatorEffectivenessVirgo(ModuleParams *parent);
++	virtual ~ActuatorEffectivenessVirgo();
++
++	bool getEffectivenessMatrix(Configuration &configuration, EffectivenessUpdateReason external_update) override;
++
++	void updateSetpoint(const matrix::Vector<float, NUM_AXES> &control_sp,
++			   int matrix_index,
++			   ActuatorVector &actuator_sp,
++			   const ActuatorVector &actuator_min,
++			   const ActuatorVector &actuator_max) override;
++
++	const char *name() const override { return "Virgo"; }
++
++	void updateParams() override;
++
++private:
++	ActuatorEffectivenessRotors *_rotors{nullptr};
++	int _first_servo_idx{0};
++
++	param_t _param_rotor_count{PARAM_INVALID};
++	param_t _param_thr_hover{PARAM_INVALID};
++	param_t _param_thr_min{PARAM_INVALID};
++	param_t _param_thr_max{PARAM_INVALID};
++
++	int32_t _rotor_count{8};
++	float _hover_throttle{0.35f};
++	float _min_throttle{0.10f};
++	float _max_throttle{0.90f};
++
++	// Square Symmetric Frame Dimensions (MorphEUS / Virgo):
++	// Lx: Longitudinal half-span (X axis) = 0.25m
++	// Ly: Transverse half-span (Y axis)   = 0.25m
++	const float _lx{0.25f};
++	const float _ly{0.25f};
++	float _r{0.35355339f}; // sqrt(0.25^2 + 0.25^2) = 0.25 * sqrt(2)
++
++	// Mode gating: lock servos upright during takeoff, landing, and ground operations
++	uORB::Subscription _vehicle_land_detected_sub{ORB_ID(vehicle_land_detected)};
++	uORB::Subscription _vehicle_local_position_sub{ORB_ID(vehicle_local_position)};
++
++	// Servo Phase-Lead Compensator states (eliminating mechanical gimbal time-lag)
++	float _alpha_prev[4]{0.0f, 0.0f, 0.0f, 0.0f};
++	float _beta_prev[4]{0.0f, 0.0f, 0.0f, 0.0f};
++	hrt_abstime _last_update_us{0};
++};
+diff --git a/src/modules/mc_pos_control/MulticopterPositionControl.cpp b/src/modules/mc_pos_control/MulticopterPositionControl.cpp
+index 9801ab8061..a1951eec62 100644
+--- a/src/modules/mc_pos_control/MulticopterPositionControl.cpp
++++ b/src/modules/mc_pos_control/MulticopterPositionControl.cpp
+@@ -605,6 +605,64 @@ void MulticopterPositionControl::Run()
+ 			// Publish attitude setpoint output
+ 			vehicle_attitude_setpoint_s attitude_setpoint{};
+ 			_control.getAttitudeSetpoint(attitude_setpoint);
++
++			if (_param_airframe.get() == 16 || _param_airframe.get() == 17 || _param_airframe.get() == 18) { // Tilting Multirotor, Virgo OMAV, or MorphEUS OMAV
++				matrix::Eulerf attitude_euler(matrix::Quatf(attitude_setpoint.q_d));
++				float roll_body = attitude_euler.phi();
++				float pitch_body = attitude_euler.theta();
++				const float yaw_body = attitude_euler.psi();
++
++				// Consider the desired body angle
++				if (_tilting_mc_angles_sub.updated()) {
++					tilting_mc_desired_angles_s tilting_mc_angles_sp;
++
++					if (_tilting_mc_angles_sub.copy(&tilting_mc_angles_sp) &&
++					    (tilting_mc_angles_sp.timestamp > _last_angles_setpoint)) {
++
++						if (_param_tilting_type.get() == 0 && _param_mpc_pitch_on_tilt.get()) {
++							_tilting_mc_pitch_sp = math::constrain(tilting_mc_angles_sp.pitch_body,
++								math::radians(_param_des_pitch_min.get()), math::radians(_param_des_pitch_max.get()));
++
++						} else if (_param_tilting_type.get() == 1) {
++							_tilting_mc_pitch_sp = math::constrain(tilting_mc_angles_sp.pitch_body,
++								math::radians(_param_des_pitch_min.get()), math::radians(_param_des_pitch_max.get()));
++							_tilting_mc_roll_sp = math::constrain(tilting_mc_angles_sp.roll_body,
++								math::radians(_param_des_roll_min.get()), math::radians(_param_des_roll_max.get()));
++						}
++
++						_last_angles_setpoint = tilting_mc_angles_sp.timestamp;
++					}
++				}
++
++				// For the H-tilting multirotor the tilt_servo angle must always be updated
++				if (_param_tilting_type.get() == 0 && _param_mpc_pitch_on_tilt.get()) {
++					_tilting_servo_sp.angle[0] = pitch_body - _tilting_mc_pitch_sp;
++					_tilting_mc_roll_sp = roll_body;
++					_tilting_servo_sp.timestamp = hrt_absolute_time();
++					_tilting_servo_setpoint_pub.publish(_tilting_servo_sp);
++				}
++
++				roll_body = _tilting_mc_roll_sp;
++				pitch_body = _tilting_mc_pitch_sp;
++
++				matrix::Quatf q_temp(matrix::Eulerf(roll_body, pitch_body, yaw_body));
++				q_temp.copyTo(attitude_setpoint.q_d);
++
++				// Evaluate forces for fully actuated tilting multirotor
++				if (_param_tilting_type.get() == 1) {
++					// Use vehicle actual heading states.yaw for projection to eliminate yaw-translation coupling
++					Dcmf R_actual(matrix::Eulerf(roll_body, pitch_body, states.yaw));
++					Vector3f thrust_world(local_pos_sp.thrust[0], local_pos_sp.thrust[1], local_pos_sp.thrust[2]);
++					Vector3f thrust_body_vec = R_actual.transpose() * thrust_world;
++
++					attitude_setpoint.thrust_body[0] = math::constrain(thrust_body_vec(0),
++								-1.0f * _param_f_max.get(), _param_f_max.get());
++					attitude_setpoint.thrust_body[1] = math::constrain(thrust_body_vec(1),
++								-1.0f * _param_f_max.get(), _param_f_max.get());
++					attitude_setpoint.thrust_body[2] = thrust_body_vec(2);
++				}
++			}
++
+ 			attitude_setpoint.timestamp = hrt_absolute_time();
+ 			_vehicle_attitude_setpoint_pub.publish(attitude_setpoint);
+ 

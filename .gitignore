@@ -1,0 +1,30 @@
+# ==============================================================================
+# Virgo_UAV_PID_v2 - Git Ignore Rules
+# ==============================================================================
+
+# Exclude Unrelated Workspaces & Experiments
+PX4_tilting_multicopters/
+Virgo_UAV
+Virgo_UAV_ADRC/
+Virgo_UAV_FuzzyPID/
+Virgo_UAV_PID/
+*.pdf
+paper_text.txt
+**/.git_v1_backup/
+
+# Build Artifacts & Dependencies
+build/
+install/
+log/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.swp
+*~
+.vscode/
+.idea/
+
+# Large Flight Logs (Ignore uncompressed 3GB CSV files, keep compressed .csv.gz)
+**/flight_logs/*.csv
+!**/flight_logs/*.csv.gz

@@ -1,0 +1,432 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version='1.9'>
+  <model name='morpheus'>
+    <pose>0 0 0.35 0 0 0</pose>
+    <self_collide>false</self_collide>
+    <static>false</static>
+
+    <!-- ==================== BASE LINK: FUSELAGE, AVIONICS & PROBE ==================== -->
+    <link name='base_link'>
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>1.05</mass>
+        <inertia>
+          <ixx>0.020</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.020</iyy>
+          <iyz>0</iyz>
+          <izz>0.035</izz>
+        </inertia>
+      </inertial>
+
+      <!-- Central Fuselage (Avionics & Battery Core) -->
+      <collision name='fuselage_col'>
+        <geometry><box><size>0.24 0.16 0.10</size></box></geometry>
+        <surface>
+          <contact><ode><min_depth>0.001</min_depth><max_vel>0</max_vel></ode></contact>
+          <friction><ode/></friction>
+        </surface>
+      </collision>
+      <visual name='fuselage_vis'>
+        <geometry><box><size>0.24 0.16 0.10</size></box></geometry>
+        <material>
+          <ambient>0.12 0.15 0.20 1</ambient>
+          <diffuse>0.18 0.22 0.30 1</diffuse>
+          <specular>0.8 0.8 0.9 1</specular>
+        </material>
+      </visual>
+
+      <!-- Inspection End-Effector Tool (Black Rod from MorphEUS Paper Fig. 6 & 11) -->
+      <visual name='probe_vis'>
+        <pose>0.25 0 0 0 1.5708 0</pose>
+        <geometry><cylinder><radius>0.008</radius><length>0.26</length></cylinder></geometry>
+        <material>
+          <ambient>0.05 0.05 0.05 1</ambient>
+          <diffuse>0.1 0.1 0.1 1</diffuse>
+          <specular>0.4 0.4 0.4 1</specular>
+        </material>
+      </visual>
+      <visual name='probe_tip_vis'>
+        <pose>0.38 0 0 0 0 0</pose>
+        <geometry><sphere><radius>0.014</radius></sphere></geometry>
+        <material>
+          <ambient>0.8 0.1 0.1 1</ambient>
+          <diffuse>0.9 0.2 0.2 1</diffuse>
+        </material>
+      </visual>
+
+      <!-- 4 Structural Carbon-Fiber Arms (to +/-0.25, +/-0.25) -->
+      <visual name='arm_vis_0'><pose>0.125 0.125 0 0 0 0.7854</pose><geometry><box><size>0.28 0.024 0.016</size></box></geometry><material><diffuse>0.15 0.15 0.15 1</diffuse></material></visual>
+      <visual name='arm_vis_1'><pose>-0.125 0.125 0 0 0 -0.7854</pose><geometry><box><size>0.28 0.024 0.016</size></box></geometry><material><diffuse>0.15 0.15 0.15 1</diffuse></material></visual>
+      <visual name='arm_vis_2'><pose>-0.125 -0.125 0 0 0 0.7854</pose><geometry><box><size>0.28 0.024 0.016</size></box></geometry><material><diffuse>0.15 0.15 0.15 1</diffuse></material></visual>
+      <visual name='arm_vis_3'><pose>0.125 -0.125 0 0 0 -0.7854</pose><geometry><box><size>0.28 0.024 0.016</size></box></geometry><material><diffuse>0.15 0.15 0.15 1</diffuse></material></visual>
+
+      <!-- Vertical Landing Legs (stable contact) -->
+      <collision name='leg_0'>
+        <pose>0.16 0.16 -0.14 0 0 0</pose>
+        <geometry><box><size>0.016 0.016 0.16</size></box></geometry>
+        <surface>
+          <contact><ode><min_depth>0.001</min_depth><max_vel>0</max_vel></ode></contact>
+          <friction><ode/></friction>
+        </surface>
+      </collision>
+      <visual name='leg_0_v'><pose>0.16 0.16 -0.14 0 0 0</pose><geometry><box><size>0.016 0.016 0.16</size></box></geometry><material><diffuse>0.2 0.2 0.2 1</diffuse></material></visual>
+
+      <collision name='leg_1'>
+        <pose>-0.16 0.16 -0.14 0 0 0</pose>
+        <geometry><box><size>0.016 0.016 0.16</size></box></geometry>
+        <surface>
+          <contact><ode><min_depth>0.001</min_depth><max_vel>0</max_vel></ode></contact>
+          <friction><ode/></friction>
+        </surface>
+      </collision>
+      <visual name='leg_1_v'><pose>-0.16 0.16 -0.14 0 0 0</pose><geometry><box><size>0.016 0.016 0.16</size></box></geometry><material><diffuse>0.2 0.2 0.2 1</diffuse></material></visual>
+
+      <collision name='leg_2'>
+        <pose>0.16 -0.16 -0.14 0 0 0</pose>
+        <geometry><box><size>0.016 0.016 0.16</size></box></geometry>
+        <surface>
+          <contact><ode><min_depth>0.001</min_depth><max_vel>0</max_vel></ode></contact>
+          <friction><ode/></friction>
+        </surface>
+      </collision>
+      <visual name='leg_2_v'><pose>0.16 -0.16 -0.14 0 0 0</pose><geometry><box><size>0.016 0.016 0.16</size></box></geometry><material><diffuse>0.2 0.2 0.2 1</diffuse></material></visual>
+
+      <collision name='leg_3'>
+        <pose>-0.16 -0.16 -0.14 0 0 0</pose>
+        <geometry><box><size>0.016 0.016 0.16</size></box></geometry>
+        <surface>
+          <contact><ode><min_depth>0.001</min_depth><max_vel>0</max_vel></ode></contact>
+          <friction><ode/></friction>
+        </surface>
+      </collision>
+      <visual name='leg_3_v'><pose>-0.16 -0.16 -0.14 0 0 0</pose><geometry><box><size>0.016 0.016 0.16</size></box></geometry><material><diffuse>0.2 0.2 0.2 1</diffuse></material></visual>
+
+      <gravity>true</gravity>
+      <velocity_decay/>
+
+      <!-- Sensors -->
+      <sensor name="air_pressure_sensor" type="air_pressure">
+        <gz_frame_id>base_link</gz_frame_id>
+        <always_on>1</always_on>
+        <update_rate>50</update_rate>
+        <air_pressure>
+          <pressure><noise type="gaussian"><mean>0</mean><stddev>3</stddev></noise></pressure>
+        </air_pressure>
+      </sensor>
+      <sensor name="magnetometer_sensor" type="magnetometer">
+        <gz_frame_id>base_link</gz_frame_id>
+        <always_on>1</always_on>
+        <update_rate>100</update_rate>
+        <magnetometer>
+          <x><noise type="gaussian"><stddev>0.0001</stddev></noise></x>
+          <y><noise type="gaussian"><stddev>0.0001</stddev></noise></y>
+          <z><noise type="gaussian"><stddev>0.0001</stddev></noise></z>
+        </magnetometer>
+      </sensor>
+      <sensor name="imu_sensor" type="imu">
+        <gz_frame_id>base_link</gz_frame_id>
+        <always_on>1</always_on>
+        <update_rate>250</update_rate>
+        <imu>
+          <angular_velocity>
+            <x><noise type="gaussian"><mean>0.0</mean><stddev>0.0008726646</stddev></noise></x>
+            <y><noise type="gaussian"><mean>0.0</mean><stddev>0.0008726646</stddev></noise></y>
+            <z><noise type="gaussian"><mean>0.0</mean><stddev>0.0008726646</stddev></noise></z>
+          </angular_velocity>
+          <linear_acceleration>
+            <x><noise type="gaussian"><mean>0.0</mean><stddev>0.00637</stddev></noise></x>
+            <y><noise type="gaussian"><mean>0.0</mean><stddev>0.00637</stddev></noise></y>
+            <z><noise type="gaussian"><mean>0.0</mean><stddev>0.00686</stddev></noise></z>
+          </linear_acceleration>
+        </imu>
+      </sensor>
+      <sensor name="navsat_sensor" type="navsat">
+        <gz_frame_id>base_link</gz_frame_id>
+        <always_on>1</always_on>
+        <update_rate>30</update_rate>
+      </sensor>
+    </link>
+
+    <!-- ========================================================================= -->
+    <!--  ARM 0: FRONT-LEFT (+0.25, +0.25, 0) | PAIRED SERVOS (0: Pitch, 1: Roll) -->
+    <!-- ========================================================================= -->
+    <link name='gimbal_pitch_link_0'>
+      <pose>0.25 0.25 0 0 0 0</pose>
+      <inertial><mass>0.04</mass><inertia><ixx>1e-4</ixx><iyy>1e-4</iyy><izz>1e-4</izz></inertia></inertial>
+      <visual name='gp_vis_0'><geometry><box><size>0.03 0.04 0.03</size></box></geometry><material><diffuse>0.3 0.3 0.4 1</diffuse></material></visual>
+    </link>
+    <joint name='servo_pitch_joint_0' type='revolute'>
+      <parent>base_link</parent><child>gimbal_pitch_link_0</child>
+      <axis><xyz>0 1 0</xyz><limit><lower>-1.5708</lower><upper>1.5708</upper><effort>10</effort><velocity>10</velocity></limit><dynamics><damping>0.05</damping></dynamics></axis>
+    </joint>
+
+    <link name='rotor_pod_link_0'>
+      <pose>0.25 0.25 0 0 0 0</pose>
+      <inertial><mass>0.06</mass><inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz></inertia></inertial>
+      <visual name='pod_vis_0'><geometry><cylinder><radius>0.02</radius><length>0.06</length></cylinder></geometry><material><diffuse>0.1 0.6 0.8 1</diffuse></material></visual>
+    </link>
+    <joint name='servo_roll_joint_0' type='revolute'>
+      <parent>gimbal_pitch_link_0</parent><child>rotor_pod_link_0</child>
+      <axis><xyz>1 0 0</xyz><limit><lower>-1.5708</lower><upper>1.5708</upper><effort>10</effort><velocity>10</velocity></limit><dynamics><damping>0.05</damping></dynamics></axis>
+    </joint>
+
+    <!-- Co-Axial Rotor Pair on Pod 0 -->
+    <link name='rotor_0'>
+      <pose>0.25 0.25 0.035 0 0 0</pose>
+      <inertial><mass>0.015</mass><inertia><ixx>1e-5</ixx><iyy>1e-5</iyy><izz>2e-5</izz></inertia></inertial>
+      <visual name='r0_vis'><geometry><cylinder><radius>0.10</radius><length>0.005</length></cylinder></geometry><material><diffuse>0.8 0.1 0.1 0.7</diffuse></material></visual>
+    </link>
+    <joint name='rotor_0_joint' type='revolute'>
+      <parent>rotor_pod_link_0</parent><child>rotor_0</child>
+      <axis><xyz>0 0 1</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
+    </joint>
+
+    <link name='rotor_1'>
+      <pose>0.25 0.25 -0.035 0 0 0</pose>
+      <inertial><mass>0.015</mass><inertia><ixx>1e-5</ixx><iyy>1e-5</iyy><izz>2e-5</izz></inertia></inertial>
+      <visual name='r1_vis'><geometry><cylinder><radius>0.10</radius><length>0.005</length></cylinder></geometry><material><diffuse>0.1 0.1 0.8 0.7</diffuse></material></visual>
+    </link>
+    <joint name='rotor_1_joint' type='revolute'>
+      <parent>rotor_pod_link_0</parent><child>rotor_1</child>
+      <axis><xyz>0 0 1</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
+    </joint>
+
+    <!-- ========================================================================= -->
+    <!--  ARM 1: BACK-LEFT (-0.25, +0.25, 0) | PAIRED SERVOS (2: Pitch, 3: Roll)  -->
+    <!-- ========================================================================= -->
+    <link name='gimbal_pitch_link_1'>
+      <pose>-0.25 0.25 0 0 0 0</pose>
+      <inertial><mass>0.04</mass><inertia><ixx>1e-4</ixx><iyy>1e-4</iyy><izz>1e-4</izz></inertia></inertial>
+      <visual name='gp_vis_1'><geometry><box><size>0.03 0.04 0.03</size></box></geometry><material><diffuse>0.3 0.3 0.4 1</diffuse></material></visual>
+    </link>
+    <joint name='servo_pitch_joint_1' type='revolute'>
+      <parent>base_link</parent><child>gimbal_pitch_link_1</child>
+      <axis><xyz>0 1 0</xyz><limit><lower>-1.5708</lower><upper>1.5708</upper><effort>10</effort><velocity>10</velocity></limit><dynamics><damping>0.05</damping></dynamics></axis>
+    </joint>
+
+    <link name='rotor_pod_link_1'>
+      <pose>-0.25 0.25 0 0 0 0</pose>
+      <inertial><mass>0.06</mass><inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz></inertia></inertial>
+      <visual name='pod_vis_1'><geometry><cylinder><radius>0.02</radius><length>0.06</length></cylinder></geometry><material><diffuse>0.1 0.6 0.8 1</diffuse></material></visual>
+    </link>
+    <joint name='servo_roll_joint_1' type='revolute'>
+      <parent>gimbal_pitch_link_1</parent><child>rotor_pod_link_1</child>
+      <axis><xyz>1 0 0</xyz><limit><lower>-1.5708</lower><upper>1.5708</upper><effort>10</effort><velocity>10</velocity></limit><dynamics><damping>0.05</damping></dynamics></axis>
+    </joint>
+
+    <!-- Co-Axial Rotor Pair on Pod 1 -->
+    <link name='rotor_2'>
+      <pose>-0.25 0.25 0.035 0 0 0</pose>
+      <inertial><mass>0.015</mass><inertia><ixx>1e-5</ixx><iyy>1e-5</iyy><izz>2e-5</izz></inertia></inertial>
+      <visual name='r2_vis'><geometry><cylinder><radius>0.10</radius><length>0.005</length></cylinder></geometry><material><diffuse>0.8 0.1 0.1 0.7</diffuse></material></visual>
+    </link>
+    <joint name='rotor_2_joint' type='revolute'>
+      <parent>rotor_pod_link_1</parent><child>rotor_2</child>
+      <axis><xyz>0 0 1</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
+    </joint>
+
+    <link name='rotor_3'>
+      <pose>-0.25 0.25 -0.035 0 0 0</pose>
+      <inertial><mass>0.015</mass><inertia><ixx>1e-5</ixx><iyy>1e-5</iyy><izz>2e-5</izz></inertia></inertial>
+      <visual name='r3_vis'><geometry><cylinder><radius>0.10</radius><length>0.005</length></cylinder></geometry><material><diffuse>0.1 0.1 0.8 0.7</diffuse></material></visual>
+    </link>
+    <joint name='rotor_3_joint' type='revolute'>
+      <parent>rotor_pod_link_1</parent><child>rotor_3</child>
+      <axis><xyz>0 0 1</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
+    </joint>
+
+    <!-- ========================================================================= -->
+    <!--  ARM 2: BACK-RIGHT (-0.25, -0.25, 0) | PAIRED SERVOS (4: Pitch, 5: Roll) -->
+    <!-- ========================================================================= -->
+    <link name='gimbal_pitch_link_2'>
+      <pose>-0.25 -0.25 0 0 0 0</pose>
+      <inertial><mass>0.04</mass><inertia><ixx>1e-4</ixx><iyy>1e-4</iyy><izz>1e-4</izz></inertia></inertial>
+      <visual name='gp_vis_2'><geometry><box><size>0.03 0.04 0.03</size></box></geometry><material><diffuse>0.3 0.3 0.4 1</diffuse></material></visual>
+    </link>
+    <joint name='servo_pitch_joint_2' type='revolute'>
+      <parent>base_link</parent><child>gimbal_pitch_link_2</child>
+      <axis><xyz>0 1 0</xyz><limit><lower>-1.5708</lower><upper>1.5708</upper><effort>10</effort><velocity>10</velocity></limit><dynamics><damping>0.05</damping></dynamics></axis>
+    </joint>
+
+    <link name='rotor_pod_link_2'>
+      <pose>-0.25 -0.25 0 0 0 0</pose>
+      <inertial><mass>0.06</mass><inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz></inertia></inertial>
+      <visual name='pod_vis_2'><geometry><cylinder><radius>0.02</radius><length>0.06</length></cylinder></geometry><material><diffuse>0.1 0.6 0.8 1</diffuse></material></visual>
+    </link>
+    <joint name='servo_roll_joint_2' type='revolute'>
+      <parent>gimbal_pitch_link_2</parent><child>rotor_pod_link_2</child>
+      <axis><xyz>1 0 0</xyz><limit><lower>-1.5708</lower><upper>1.5708</upper><effort>10</effort><velocity>10</velocity></limit><dynamics><damping>0.05</damping></dynamics></axis>
+    </joint>
+
+    <!-- Co-Axial Rotor Pair on Pod 2 -->
+    <link name='rotor_4'>
+      <pose>-0.25 -0.25 0.035 0 0 0</pose>
+      <inertial><mass>0.015</mass><inertia><ixx>1e-5</ixx><iyy>1e-5</iyy><izz>2e-5</izz></inertia></inertial>
+      <visual name='r4_vis'><geometry><cylinder><radius>0.10</radius><length>0.005</length></cylinder></geometry><material><diffuse>0.8 0.1 0.1 0.7</diffuse></material></visual>
+    </link>
+    <joint name='rotor_4_joint' type='revolute'>
+      <parent>rotor_pod_link_2</parent><child>rotor_4</child>
+      <axis><xyz>0 0 1</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
+    </joint>
+
+    <link name='rotor_5'>
+      <pose>-0.25 -0.25 -0.035 0 0 0</pose>
+      <inertial><mass>0.015</mass><inertia><ixx>1e-5</ixx><iyy>1e-5</iyy><izz>2e-5</izz></inertia></inertial>
+      <visual name='r5_vis'><geometry><cylinder><radius>0.10</radius><length>0.005</length></cylinder></geometry><material><diffuse>0.1 0.1 0.8 0.7</diffuse></material></visual>
+    </link>
+    <joint name='rotor_5_joint' type='revolute'>
+      <parent>rotor_pod_link_2</parent><child>rotor_5</child>
+      <axis><xyz>0 0 1</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
+    </joint>
+
+    <!-- ========================================================================= -->
+    <!--  ARM 3: FRONT-RIGHT (+0.25, -0.25, 0) | PAIRED SERVOS (6: Pitch, 7: Roll) -->
+    <!-- ========================================================================= -->
+    <link name='gimbal_pitch_link_3'>
+      <pose>0.25 -0.25 0 0 0 0</pose>
+      <inertial><mass>0.04</mass><inertia><ixx>1e-4</ixx><iyy>1e-4</iyy><izz>1e-4</izz></inertia></inertial>
+      <visual name='gp_vis_3'><geometry><box><size>0.03 0.04 0.03</size></box></geometry><material><diffuse>0.3 0.3 0.4 1</diffuse></material></visual>
+    </link>
+    <joint name='servo_pitch_joint_3' type='revolute'>
+      <parent>base_link</parent><child>gimbal_pitch_link_3</child>
+      <axis><xyz>0 1 0</xyz><limit><lower>-1.5708</lower><upper>1.5708</upper><effort>10</effort><velocity>10</velocity></limit><dynamics><damping>0.05</damping></dynamics></axis>
+    </joint>
+
+    <link name='rotor_pod_link_3'>
+      <pose>0.25 -0.25 0 0 0 0</pose>
+      <inertial><mass>0.06</mass><inertia><ixx>2e-4</ixx><iyy>2e-4</iyy><izz>2e-4</izz></inertia></inertial>
+      <visual name='pod_vis_3'><geometry><cylinder><radius>0.02</radius><length>0.06</length></cylinder></geometry><material><diffuse>0.1 0.6 0.8 1</diffuse></material></visual>
+    </link>
+    <joint name='servo_roll_joint_3' type='revolute'>
+      <parent>gimbal_pitch_link_3</parent><child>rotor_pod_link_3</child>
+      <axis><xyz>1 0 0</xyz><limit><lower>-1.5708</lower><upper>1.5708</upper><effort>10</effort><velocity>10</velocity></limit><dynamics><damping>0.05</damping></dynamics></axis>
+    </joint>
+
+    <!-- Co-Axial Rotor Pair on Pod 3 -->
+    <link name='rotor_6'>
+      <pose>0.25 -0.25 0.035 0 0 0</pose>
+      <inertial><mass>0.015</mass><inertia><ixx>1e-5</ixx><iyy>1e-5</iyy><izz>2e-5</izz></inertia></inertial>
+      <visual name='r6_vis'><geometry><cylinder><radius>0.10</radius><length>0.005</length></cylinder></geometry><material><diffuse>0.8 0.1 0.1 0.7</diffuse></material></visual>
+    </link>
+    <joint name='rotor_6_joint' type='revolute'>
+      <parent>rotor_pod_link_3</parent><child>rotor_6</child>
+      <axis><xyz>0 0 1</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
+    </joint>
+
+    <link name='rotor_7'>
+      <pose>0.25 -0.25 -0.035 0 0 0</pose>
+      <inertial><mass>0.015</mass><inertia><ixx>1e-5</ixx><iyy>1e-5</iyy><izz>2e-5</izz></inertia></inertial>
+      <visual name='r7_vis'><geometry><cylinder><radius>0.10</radius><length>0.005</length></cylinder></geometry><material><diffuse>0.1 0.1 0.8 0.7</diffuse></material></visual>
+    </link>
+    <joint name='rotor_7_joint' type='revolute'>
+      <parent>rotor_pod_link_3</parent><child>rotor_7</child>
+      <axis><xyz>0 0 1</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
+    </joint>
+
+    <!-- ==================== 8 CO-AXIAL MOTOR CONTROLLERS ==================== -->
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>rotor_0_joint</jointName><linkName>rotor_0</linkName><turningDirection>ccw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp><timeConstantDown>0.025</timeConstantDown><maxRotVelocity>1100.0</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant><momentConstant>0.016</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic><motorNumber>0</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient><rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim><motorType>velocity</motorType>
+    </plugin>
+
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>rotor_1_joint</jointName><linkName>rotor_1</linkName><turningDirection>cw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp><timeConstantDown>0.025</timeConstantDown><maxRotVelocity>1100.0</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant><momentConstant>0.016</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic><motorNumber>1</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient><rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim><motorType>velocity</motorType>
+    </plugin>
+
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>rotor_2_joint</jointName><linkName>rotor_2</linkName><turningDirection>ccw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp><timeConstantDown>0.025</timeConstantDown><maxRotVelocity>1100.0</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant><momentConstant>0.016</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic><motorNumber>2</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient><rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim><motorType>velocity</motorType>
+    </plugin>
+
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>rotor_3_joint</jointName><linkName>rotor_3</linkName><turningDirection>cw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp><timeConstantDown>0.025</timeConstantDown><maxRotVelocity>1100.0</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant><momentConstant>0.016</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic><motorNumber>3</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient><rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim><motorType>velocity</motorType>
+    </plugin>
+
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>rotor_4_joint</jointName><linkName>rotor_4</linkName><turningDirection>ccw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp><timeConstantDown>0.025</timeConstantDown><maxRotVelocity>1100.0</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant><momentConstant>0.016</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic><motorNumber>4</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient><rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim><motorType>velocity</motorType>
+    </plugin>
+
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>rotor_5_joint</jointName><linkName>rotor_5</linkName><turningDirection>cw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp><timeConstantDown>0.025</timeConstantDown><maxRotVelocity>1100.0</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant><momentConstant>0.016</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic><motorNumber>5</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient><rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim><motorType>velocity</motorType>
+    </plugin>
+
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>rotor_6_joint</jointName><linkName>rotor_6</linkName><turningDirection>ccw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp><timeConstantDown>0.025</timeConstantDown><maxRotVelocity>1100.0</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant><momentConstant>0.016</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic><motorNumber>6</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient><rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim><motorType>velocity</motorType>
+    </plugin>
+
+    <plugin filename="gz-sim-multicopter-motor-model-system" name="gz::sim::systems::MulticopterMotorModel">
+      <jointName>rotor_7_joint</jointName><linkName>rotor_7</linkName><turningDirection>cw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp><timeConstantDown>0.025</timeConstantDown><maxRotVelocity>1100.0</maxRotVelocity>
+      <motorConstant>8.54858e-06</motorConstant><momentConstant>0.016</momentConstant>
+      <commandSubTopic>command/motor_speed</commandSubTopic><motorNumber>7</motorNumber>
+      <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient><rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+      <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim><motorType>velocity</motorType>
+    </plugin>
+
+    <!-- ==================== 8 INDEPENDENT GIMBAL SERVO CONTROLLERS ==================== -->
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>servo_pitch_joint_0</joint_name><sub_topic>servo_0</sub_topic><p_gain>25.0</p_gain><d_gain>0.5</d_gain><i_gain>0.0</i_gain><cmd_max>5.0</cmd_max><cmd_min>-5.0</cmd_min>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>servo_roll_joint_0</joint_name><sub_topic>servo_1</sub_topic><p_gain>25.0</p_gain><d_gain>0.5</d_gain><i_gain>0.0</i_gain><cmd_max>5.0</cmd_max><cmd_min>-5.0</cmd_min>
+    </plugin>
+
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>servo_pitch_joint_1</joint_name><sub_topic>servo_2</sub_topic><p_gain>25.0</p_gain><d_gain>0.5</d_gain><i_gain>0.0</i_gain><cmd_max>5.0</cmd_max><cmd_min>-5.0</cmd_min>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>servo_roll_joint_1</joint_name><sub_topic>servo_3</sub_topic><p_gain>25.0</p_gain><d_gain>0.5</d_gain><i_gain>0.0</i_gain><cmd_max>5.0</cmd_max><cmd_min>-5.0</cmd_min>
+    </plugin>
+
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>servo_pitch_joint_2</joint_name><sub_topic>servo_4</sub_topic><p_gain>25.0</p_gain><d_gain>0.5</d_gain><i_gain>0.0</i_gain><cmd_max>5.0</cmd_max><cmd_min>-5.0</cmd_min>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>servo_roll_joint_2</joint_name><sub_topic>servo_5</sub_topic><p_gain>25.0</p_gain><d_gain>0.5</d_gain><i_gain>0.0</i_gain><cmd_max>5.0</cmd_max><cmd_min>-5.0</cmd_min>
+    </plugin>
+
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>servo_pitch_joint_3</joint_name><sub_topic>servo_6</sub_topic><p_gain>25.0</p_gain><d_gain>0.5</d_gain><i_gain>0.0</i_gain><cmd_max>5.0</cmd_max><cmd_min>-5.0</cmd_min>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>servo_roll_joint_3</joint_name><sub_topic>servo_7</sub_topic><p_gain>25.0</p_gain><d_gain>0.5</d_gain><i_gain>0.0</i_gain><cmd_max>5.0</cmd_max><cmd_min>-5.0</cmd_min>
+    </plugin>
+
+  </model>
+</sdf>
