@@ -43,24 +43,24 @@ This intrinsic coupling between translation and orientation severely impedes ope
 
 ## 2. Mechanical Architecture & CAD Specifications
 
-The mechanical structure of the Virgo OMAV platform (modeled as `AUV_USDF_V2`) features an H-frame symmetric configuration with 4 tilting pods. Each pod houses a coaxial counter-rotating dual-rotor unit driven by 2 independent BLDC motors and is articulated by a 2-axis servo gimbal mechanism ($\alpha_i$ outer pitch tilt, $\beta_i$ inner roll tilt).
+The mechanical structure of the Virgo OMAV platform (modeled as `AUV_USDF_V2`) features an H-frame symmetric configuration with 4 tilting pods. Each pod houses a coaxial counter-rotating dual-rotor unit driven by 2 independent BLDC motors and is articulated by a 2-axis servo gimbal mechanism ($`\alpha_i`$ outer pitch tilt, $`\beta_i`$ inner roll tilt).
 
 | Mechanical / Physical Parameter | Mathematical Symbol | Value | Unit | Description |
 | :--- | :---: | :---: | :---: | :--- |
-| **Total All-Up Takeoff Mass** | $m$ | **$4.56$** | $\text{kg}$ | Aligned with MorphQuad physical platform specifications |
-| **Longitudinal Half-Length** | $L_x$ | $0.19899$ | $\text{m}$ | Center of Mass to arm pitch axis |
-| **Lateral Half-Length** | $L_y$ | $0.19742$ | $\text{m}$ | Center of Mass to pod pivot roll axis |
-| **Radial Arm Radius** | $r$ | $0.28030$ | $\text{m}$ | $r = \sqrt{L_x^2 + L_y^2}$ |
-| **Moment of Inertia (X-axis)** | $J_{xx}$ | $0.0854$ | $\text{kg}\cdot\text{m}^2$ | CAD measured roll inertia tensor |
-| **Moment of Inertia (Y-axis)** | $J_{yy}$ | $0.0921$ | $\text{kg}\cdot\text{m}^2$ | CAD measured pitch inertia tensor |
-| **Moment of Inertia (Z-axis)** | $J_{zz}$ | $0.1458$ | $\text{kg}\cdot\text{m}^2$ | CAD measured yaw inertia tensor |
-| **Number of BLDC Motors** | $N_m$ | $8$ | - | 4 coaxial counter-rotating pairs ($M_0 \dots M_7$) |
-| **Number of Gimbal Servos** | $N_s$ | $8$ | - | 4 outer pitch servos ($\alpha_i$) + 4 inner roll servos ($\beta_i$) |
-| **Max Rotor Angular Velocity** | $\Omega_{\max}$ | $1200$ | $\text{rad/s}$ | Maximum rotor speed limit |
-| **Rotor Thrust Coefficient** | $c_T$ | $8.548 \times 10^{-6}$ | $\text{N}\cdot\text{s}^2/\text{rad}^2$ | Aerodynamic lift constant |
-| **Rotor Drag Coefficient** | $c_Q$ | $0.06 \times c_T$ | $\text{N}\cdot\text{m}\cdot\text{s}^2/\text{rad}^2$ | Propeller torque constant |
-| **Max Total Vertical Thrust** | $T_{\max}$ | $\approx 74.0$ | $\text{N}$ | Thrust-to-Weight Ratio $\approx 1.65$ |
-| **Servo Tilt Angle Limits** | $\alpha_{\max}, \beta_{\max}$ | $\pm 90^\circ$ ($\pm \pi/2$) | $\text{rad}$ | Full hemispherical vectoring range |
+| **Total All-Up Takeoff Mass** | $m$ | **4.56** | $\text{kg}$ | Aligned with MorphQuad physical platform specifications |
+| **Longitudinal Half-Length** | $`L_x`$ | $0.19899$ | $\text{m}$ | Center of Mass to arm pitch axis |
+| **Lateral Half-Length** | $`L_y`$ | $0.19742$ | $\text{m}$ | Center of Mass to pod pivot roll axis |
+| **Radial Arm Radius** | $r$ | $0.28030$ | $\text{m}$ | $`r = \sqrt{L_x^2 + L_y^2}`$ |
+| **Moment of Inertia (X-axis)** | $`J_{xx}`$ | $0.0854$ | $\text{kg}\cdot\text{m}^2$ | CAD measured roll inertia tensor |
+| **Moment of Inertia (Y-axis)** | $`J_{yy}`$ | $0.0921$ | $\text{kg}\cdot\text{m}^2$ | CAD measured pitch inertia tensor |
+| **Moment of Inertia (Z-axis)** | $`J_{zz}`$ | $0.1458$ | $\text{kg}\cdot\text{m}^2$ | CAD measured yaw inertia tensor |
+| **Number of BLDC Motors** | $`N_m`$ | $8$ | - | 4 coaxial counter-rotating pairs ($`M_0 \dots M_7`$) |
+| **Number of Gimbal Servos** | $`N_s`$ | $8$ | - | 4 outer pitch servos ($`\alpha_i`$) + 4 inner roll servos ($`\beta_i`$) |
+| **Max Rotor Angular Velocity** | $`\Omega_{\max}`$ | $1200$ | $\text{rad/s}$ | Maximum rotor speed limit |
+| **Rotor Thrust Coefficient** | $`c_T`$ | $8.548 \times 10^{-6}$ | $\text{N}\cdot\text{s}^2/\text{rad}^2$ | Aerodynamic lift constant |
+| **Rotor Drag Coefficient** | $`c_Q`$ | $`0.06 \times c_T`$ | $\text{N}\cdot\text{m}\cdot\text{s}^2/\text{rad}^2$ | Propeller torque constant |
+| **Max Total Vertical Thrust** | $`T_{\max}`$ | $\approx 74.0$ | $\text{N}$ | Thrust-to-Weight Ratio $\approx 1.65$ |
+| **Servo Tilt Angle Limits** | $`\alpha_{\max}, \beta_{\max}`$ | $\pm 90^\circ$ ($\pm \pi/2$) | $\text{rad}$ | Full hemispherical vectoring range |
 | **Ground Landing Interface** | - | $4 \times$ Spheres | $\text{m}$ | Analytical $r=0.010\text{m}$ feet preventing contact chatter |
 
 ---
@@ -77,7 +77,7 @@ The mechanical structure of the Virgo OMAV platform (modeled as `AUV_USDF_V2`) f
 The system kinematics are defined across three primary reference frames:
 - **Inertial World Frame** ($\mathcal{W}$): Fixed reference frame adhering to the North-East-Down (NED) convention.
 - **Body-Fixed Frame** ($\mathcal{B}$): Frame centered at the vehicle Center of Mass (CoM).
-- **Propeller Frames** ($\mathcal{P}_i$, for $i \in \{1, 2, 3, 4\}$): Local coordinate frames fixed to each tilting pod pivot.
+- **Propeller Frames** ($`\mathcal{P}_i`$, for $i \in \{1, 2, 3, 4\}$): Local coordinate frames fixed to each tilting pod pivot.
 - **Rotation Matrix** ($\mathbf{R} \in \mathrm{SO}(3)$): Orthogonal rotation matrix mapping coordinates from $\mathcal{B}$ to $\mathcal{W}$.
 
 The orthogonal unit coordinate bases are defined as:
@@ -93,13 +93,13 @@ $$
 $$
 
 ### 3.2. Pod Tilting Kinematics
-Each pod undergoes an extrinsic rotation parameterized by outer arm pitch angle $\alpha_i$ and inner shaft roll angle $\beta_i$. The unit thrust direction $\hat{\mathbf{t}}_i \in \mathbb{S}^2$ generated by the $i$-th pod in frame $\mathcal{B}$ is given by:
+Each pod undergoes an extrinsic rotation parameterized by outer arm pitch angle $`\alpha_i`$ and inner shaft roll angle $`\beta_i`$. The unit thrust direction $`\hat{\mathbf{t}}_i \in \mathbb{S}^2`$ generated by the $i$-th pod in frame $\mathcal{B}$ is given by:
 
 $$
 \hat{\mathbf{t}}_i(\alpha_i, \beta_i) = \begin{bmatrix} -\sin\alpha_i \cos\beta_i \\ -\sin\beta_i \\ \cos\alpha_i \cos\beta_i \end{bmatrix}
 $$
 
-The net thrust vector $\mathbf{t}_i$ produced by the coaxial pair at pod $i$ is:
+The net thrust vector $`\mathbf{t}_i`$ produced by the coaxial pair at pod $i$ is:
 
 $$
 \mathbf{t}_i = T_i \hat{\mathbf{t}}_i(\alpha_i, \beta_i), \quad T_i = c_T \left( \Omega_{i,\mathrm{top}}^2 + \Omega_{i,\mathrm{bot}}^2 \right)
@@ -118,15 +118,15 @@ m \dot{\mathbf{v}} &= m \mathbf{g} + \mathbf{R} \mathbf{f}_d \\
 $$
 
 where:
-- $\mathbf{p} = [x, y, z]^T \in \mathbb{R}^3$ and $\mathbf{v} = [v_x, v_y, v_z]^T \in \mathbb{R}^3$ denote position and linear velocity in $\mathcal{W}$.
-- $\boldsymbol{\omega} = [\omega_x, \omega_y, \omega_z]^T \in \mathbb{R}^3$ denotes angular velocity in body frame $\mathcal{B}$.
-- The skew-symmetric cross-product operator $[\boldsymbol{\omega}]_\times \in \mathfrak{so}(3)$ is defined as:
+- $`\mathbf{p} = [x, y, z]^T \in \mathbb{R}^3`$ and $`\mathbf{v} = [v_x, v_y, v_z]^T \in \mathbb{R}^3`$ denote position and linear velocity in $\mathcal{W}$.
+- $`\boldsymbol{\omega} = [\omega_x, \omega_y, \omega_z]^T \in \mathbb{R}^3`$ denotes angular velocity in body frame $\mathcal{B}$.
+- The skew-symmetric cross-product operator $`[\boldsymbol{\omega}]_\times \in \mathfrak{so}(3)`$ is defined as:
 
 $$
 [\boldsymbol{\omega}]_\times = \begin{bmatrix} 0 & -\omega_z & \omega_y \\ \omega_z & 0 & -\omega_x \\ -\omega_y & \omega_x & 0 \end{bmatrix}
 $$
 
-- The total desired control force $\mathbf{f}_d \in \mathbb{R}^3$ and control torque $\boldsymbol{\tau}_d \in \mathbb{R}^3$ in $\mathcal{B}$ are:
+- The total desired control force $`\mathbf{f}_d \in \mathbb{R}^3`$ and control torque $`\boldsymbol{\tau}_d \in \mathbb{R}^3`$ in $\mathcal{B}$ are:
 
 $$
 \mathbf{f}_d = \sum_{i=1}^4 \mathbf{t}_i = \sum_{i=1}^4 T_i \hat{\mathbf{t}}_i(\alpha_i, \beta_i)
@@ -136,26 +136,26 @@ $$
 \boldsymbol{\tau}_d = \sum_{i=1}^4 \left( \mathbf{l}_i \times \mathbf{t}_i + \boldsymbol{\tau}_{M,i} \right)
 $$
 
-where $\boldsymbol{\tau}_{M,i}$ is the net aerodynamic reaction torque produced by the differential speed of the counter-rotating propellers:
+where $`\boldsymbol{\tau}_{M,i}`$ is the net aerodynamic reaction torque produced by the differential speed of the counter-rotating propellers:
 
 $$
 \boldsymbol{\tau}_{M,i} = c_Q \left( \Omega_{i,\mathrm{top}}^2 - \Omega_{i,\mathrm{bot}}^2 \right) \hat{\mathbf{t}}_i
 $$
 
 ### 3.4. Control Allocation & Closed-Form Inversion
-The mapping from desired wrench $\mathbf{w}_d = [\mathbf{f}_d^T, \boldsymbol{\tau}_d^T]^T \in \mathbb{R}^6$ to individual pod thrusts $\mathbf{T} = [T_1, T_2, T_3, T_4]^T$ is formulated via the effectiveness matrix $\mathbf{M}(\boldsymbol{\alpha}, \boldsymbol{\beta}) \in \mathbb{R}^{6 \times 4}$:
+The mapping from desired wrench $`\mathbf{w}_d = [\mathbf{f}_d^T, \boldsymbol{\tau}_d^T]^T \in \mathbb{R}^6`$ to individual pod thrusts $`\mathbf{T} = [T_1, T_2, T_3, T_4]^T`$ is formulated via the effectiveness matrix $`\mathbf{M}(\boldsymbol{\alpha}, \boldsymbol{\beta}) \in \mathbb{R}^{6 \times 4}`$:
 
 $$
 \mathbf{w}_d = \mathbf{M}(\boldsymbol{\alpha}, \boldsymbol{\beta}) \mathbf{T} + \mathbf{A}_\tau \Delta\mathbf{\Omega}^2
 $$
 
-To resolve pod thrusts and prevent gimbal lock singularities ($|\beta_i| \to 90^\circ$), the control allocation employs a **Minimum-Norm Pseudoinverse with Null-Space Projection**:
+To resolve pod thrusts and prevent gimbal lock singularities ($`|\beta_i| \to 90^\circ`$), the control allocation employs a **Minimum-Norm Pseudoinverse with Null-Space Projection**:
 
 $$
 \mathbf{T}^* = \mathbf{M}^\dagger \mathbf{w}_d + \left( \mathbf{I} - \mathbf{M}^\dagger \mathbf{M} \right) \mathbf{c}_{\mathrm{null}}
 $$
 
-Once the 3D thrust vector $\mathbf{t}_i = [t_{i,x}, t_{i,y}, t_{i,z}]^T$ is allocated to each pod, the unique physical gimbal angles $\alpha_i, \beta_i$ are solved analytically:
+Once the 3D thrust vector $`\mathbf{t}_i = [t_{i,x}, t_{i,y}, t_{i,z}]^T`$ is allocated to each pod, the unique physical gimbal angles $`\alpha_i, \beta_i`$ are solved analytically:
 
 $$
 \beta_i = -\arcsin\left( \frac{t_{i,y}}{\|\mathbf{t}_i\|} \right)
@@ -180,24 +180,24 @@ During experimental flight validation, our team identified and resolved several 
 
 1. **Elimination of the 0.53 Hz Limit Cycle Oscillation (Anti-Oscillation Control)**:
    - *Problem*: In initial testing, Yaw torque was simultaneously allocated to servo tangential vectoring and coaxial rotor reaction torque. Due to the significant time-scale separation between electromagnetic motor response ($\sim 10\text{ ms}$) and mechanical servo slew rate ($\sim 150\text{ ms}$), an asymmetric phase delay triggered a continuous $\pm 20^\circ$ servo hunting limit cycle at $0.53\text{ Hz}$, dragging all 6 DOFs into coupled oscillations.
-   - *Solution*: Set `tau_z_scaled = 0.0f` in [`ActuatorEffectivenessVirgo.cpp`](file:///home/duc/PX4/PX4-Autopilot/src/modules/control_allocator/VehicleActuatorEffectiveness/ActuatorEffectivenessVirgo.cpp). 100% of Yaw authority is allocated exclusively to the instantaneous differential rotor reaction torque:
+   - *Solution*: Set `tau_z_scaled = 0.0f` in [`ActuatorEffectivenessVirgo.cpp`](Virgo_UAV_PID_V2/px4_modifications/ActuatorEffectivenessVirgo.cpp). 100% of Yaw authority is allocated exclusively to the instantaneous differential rotor reaction torque:
 
-     $$
+     ```math
      \tau_{z,\mathrm{rotor}} = c_Q \sum_{i=1}^4 (-1)^i \Delta\Omega_i^2
-     $$
+     ```
 
-     This completely eliminated servo hunting and damped 6-DOF tracking oscillations by **$68.8\%$**.
+     This completely eliminated servo hunting and damped 6-DOF tracking oscillations by **68.8%**.
 
 2. **Phase-Lead Derivative Feedforward (`tau_lead = 0.015s`)**:
    - Integrated a low-pass filtered derivative compensator on servo position commands to predict trajectory curvatures and cancel servo gear-train lag:
 
-     $$
+     ```math
      \alpha_{i,\mathrm{cmd}} = \alpha_i + \tau_{\mathrm{lead}} \cdot \dot{\alpha}_{i,\mathrm{filtered}}
-     $$
+     ```
 
 3. **Elimination of Ground Startup Twitching (Contact Dynamics Optimization)**:
-   - *Problem*: In Gazebo, using raw CAD mesh STL collisions with over 360 bottom vertices on flat ground created severe numerical chatter in ODE's Linear Complementarity Problem (LCP) solver, causing the UAV to twitch and rotate up to **$153.2^\circ$** before takeoff.
-   - *Solution*: Replaced mesh collisions in [`model.sdf`](file:///home/duc/PX4/PX4-Autopilot/Tools/simulation/gz/models/virgo/model.sdf) with **4 analytical spherical contact feet** ($r = 0.010\text{ m}$) at exact CAD landing pad positions. Tuned joint position controller stiffness to eliminate internal chatter. Ground drift dropped to **$0.058\text{ m}$** ($-83.1\%$) and ground rotation dropped to **$4.3^\circ$** ($-97.2\%$).
+   - *Problem*: In Gazebo, using raw CAD mesh STL collisions with over 360 bottom vertices on flat ground created severe numerical chatter in ODE's Linear Complementarity Problem (LCP) solver, causing the UAV to twitch and rotate up to **153.2°** before takeoff.
+   - *Solution*: Replaced mesh collisions in [`model.sdf`](Virgo_UAV_PID_V2/models/virgo/model.sdf) with **4 analytical spherical contact feet** ($r = 0.010\text{ m}$) at exact CAD landing pad positions. Tuned joint position controller stiffness to eliminate internal chatter. Ground drift dropped to **0.058 m** (-83.1%) and ground rotation dropped to **4.3°** (-97.2%).
 
 4. **Smooth Touchdown & Servo Neutral Lock**:
    - Configured an automatic land detector threshold: below $0.40\text{ m}$ altitude and upon ground contact, all 8 servos are locked strictly upright at $0.00^\circ$ neutral, preventing post-landing rotation.
@@ -207,7 +207,7 @@ During experimental flight validation, our team identified and resolved several 
 ## 5. Flight Benchmark & Telemetry Analysis
 
 ### 5.1. The 25m × 25m Decoupled 6-DOF Square Trajectory Benchmark
-To rigorously evaluate independent 6-DOF control authority, we designed a benchmark flight with **corner stationary attitude transitions** and **constant $30^\circ$ attitude holding** along each $25\text{m}$ edge:
+To rigorously evaluate independent 6-DOF control authority, we designed a benchmark flight with **corner stationary attitude transitions** and **constant 30° attitude holding** along each $25\text{m}$ edge:
 
 ```mermaid
 flowchart LR
@@ -232,15 +232,15 @@ flowchart LR
 
 | Flight Segment | Commanded Attitude | Achieved Attitude | Cross-Track Drift | Altitude Z | Evaluation Remarks |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| **Origin Hover $(0, 0)$** | $\text{Roll} = +30.0^\circ$ | **$26.8^\circ$** | $< 0.05\text{ m}$ | **$1.50\text{ m}$** | Pure decoupled hover with zero position drift |
-| **Edge 1: $(0,0) \to (+25,0)\text{m}$** | Hold $\text{Roll} = +30.0^\circ$ | **$25.8^\circ$** (Pitch $0.5^\circ$, Yaw $-0.5^\circ$) | $Y_{\text{drift}} = -0.25\text{ m}$ | **$1.50\text{ m}$** | Cruising $+X$, servos tilt $26^\circ$ to cancel lateral force |
-| **Corner 1 $(+25, 0)\text{m}$** | Roll $\to$ Pitch $30.0^\circ$ | Smooth quintic polynomial ($4.0\text{s}$) | $< 0.03\text{ m}$ | **$1.50\text{ m}$** | Clean stationary attitude transition |
-| **Edge 2: $(+25,0) \to (+25,+25)\text{m}$** | Hold $\text{Pitch} = +30.0^\circ$ | **$30.0^\circ$** (100% Exact) | $X_{\text{drift}} = +0.02\text{ m}$ | **$1.50\text{ m}$** | Cruising $+Y$, cross-track drift only **$2\text{ cm}$** |
-| **Corner 2 $(+25, +25)\text{m}$** | Pitch $\to$ Yaw $30.0^\circ$ | Smooth quintic polynomial ($4.0\text{s}$) | $< 0.04\text{ m}$ | **$1.50\text{ m}$** | Pitch resets to $0^\circ$, heading turns to $30^\circ$ |
-| **Edge 3: $(+25,+25) \to (0,+25)\text{m}$** | Hold $\text{Yaw} = +30.0^\circ$ | **$32.2^\circ$** (Roll $0.0^\circ$, Pitch $2.3^\circ$) | $Y_{\text{drift}} = -0.10\text{ m}$ | **$1.50\text{ m}$** | Reverse $-X$ cruise with fixed oblique heading |
-| **Corner 3 $(0, +25)\text{m}$** | Yaw $\to$ Flat ($0^\circ, 0^\circ, 0^\circ$) | Smooth quintic polynomial ($4.0\text{s}$) | $< 0.02\text{ m}$ | **$1.50\text{ m}$** | Body orientation restores to nominal flat frame |
-| **Edge 4: $(0,+25) \to (0,0)\text{m}$** | Zero-Tilt ($0^\circ, 0^\circ, 0^\circ$) | $\text{Roll} = -0.1^\circ, \text{Pitch} = -0.0^\circ$ | $X_{\text{drift}} = -0.04\text{ m}$ | **$1.53\text{ m}$** | Nominal flat flight returning to home origin |
-| **Touchdown & Disarm** | Vertical descent $0.25\text{ m/s}$ | Touchdown at $Z = 0.012\text{ m}$ | $< 0.05\text{ m}$ | **$0.01\text{ m}$** | **Servos locked at $0.00^\circ$ (Zero post-landing spinning)** |
+| **Origin Hover (0, 0)** | $\text{Roll} = +30.0^\circ$ | **26.8°** | $< 0.05\text{ m}$ | **1.50 m** | Pure decoupled hover with zero position drift |
+| **Edge 1: (0, 0) → (+25, 0) m** | Hold $\text{Roll} = +30.0^\circ$ | **25.8°** (Pitch $0.5^\circ$, Yaw $-0.5^\circ$) | $`Y_{\text{drift}} = -0.25\text{ m}`$ | **1.50 m** | Cruising $+X$, servos tilt $26^\circ$ to cancel lateral force |
+| **Corner 1 (+25, 0) m** | Roll $\to$ Pitch $30.0^\circ$ | Smooth quintic polynomial ($4.0\text{s}$) | $< 0.03\text{ m}$ | **1.50 m** | Clean stationary attitude transition |
+| **Edge 2: (+25, 0) → (+25, +25) m** | Hold $\text{Pitch} = +30.0^\circ$ | **30.0°** (100% Exact) | $`X_{\text{drift}} = +0.02\text{ m}`$ | **1.50 m** | Cruising $+Y$, cross-track drift only **2 cm** |
+| **Corner 2 (+25, +25) m** | Pitch $\to$ Yaw $30.0^\circ$ | Smooth quintic polynomial ($4.0\text{s}$) | $< 0.04\text{ m}$ | **1.50 m** | Pitch resets to $0^\circ$, heading turns to $30^\circ$ |
+| **Edge 3: (+25, +25) → (0, +25) m** | Hold $\text{Yaw} = +30.0^\circ$ | **32.2°** (Roll $0.0^\circ$, Pitch $2.3^\circ$) | $`Y_{\text{drift}} = -0.10\text{ m}`$ | **1.50 m** | Reverse $-X$ cruise with fixed oblique heading |
+| **Corner 3 (0, +25) m** | Yaw $\to$ Flat ($0^\circ, 0^\circ, 0^\circ$) | Smooth quintic polynomial ($4.0\text{s}$) | $< 0.02\text{ m}$ | **1.50 m** | Body orientation restores to nominal flat frame |
+| **Edge 4: (0, +25) → (0, 0) m** | Zero-Tilt ($0^\circ, 0^\circ, 0^\circ$) | $\text{Roll} = -0.1^\circ, \text{Pitch} = -0.0^\circ$ | $`X_{\text{drift}} = -0.04\text{ m}`$ | **1.53 m** | Nominal flat flight returning to home origin |
+| **Touchdown & Disarm** | Vertical descent $0.25\text{ m/s}$ | Touchdown at $Z = 0.012\text{ m}$ | $< 0.05\text{ m}$ | **0.01 m** | **Servos locked at 0.00° (Zero post-landing spinning)** |
 
 ### 5.3. Comparative Anti-Oscillation Telemetry
 
@@ -252,14 +252,14 @@ flowchart LR
 
 | Performance Metric | Baseline Run (`1794361715`) | Tuned Anti-Oscillation Run (`1794363687`) | Improvement |
 | :--- | :---: | :---: | :---: |
-| **Ground Startup Yaw Spin** | $153.17^\circ$ | **$4.33^\circ$** | **$-97.2\%$ (Eliminated ground spin)** |
-| **Ground Startup Horizontal Drift** | $0.342\text{ m}$ | **$0.058\text{ m}$** | **$-83.1\%$ (Eliminated solver twitch)** |
-| **Yaw Angular Variation Rate** | $15.08^\circ/\text{s}$ | **$4.70^\circ/\text{s}$** | **$-68.8\%$ (Eliminated yaw hunting)** |
-| **Roll Angular Variation Rate** | $3.83^\circ/\text{s}$ | **$1.72^\circ/\text{s}$** | **$-55.1\%$ (Solid, damped airframe)** |
-| **Mean Roll Tracking Error** | $2.04^\circ$ | **$1.16^\circ$** | **$-43.1\%$** |
-| **Mean Pitch Tracking Error** | $1.79^\circ$ | **$1.12^\circ$** | **$-37.4\%$** |
-| **Mean Yaw Tracking Error** | $10.35^\circ$ | **$5.53^\circ$** | **$-46.6\%$** |
-| **Servo $\alpha_0$ Slew Jerkiness** | $21.70^\circ/\text{s}$ | **$11.80^\circ/\text{s}$** | **$-45.6\%$ (Smooth servo motion)** |
+| **Ground Startup Yaw Spin** | $153.17^\circ$ | **4.33°** | **-97.2% (Eliminated ground spin)** |
+| **Ground Startup Horizontal Drift** | $0.342\text{ m}$ | **0.058 m** | **-83.1% (Eliminated solver twitch)** |
+| **Yaw Angular Variation Rate** | $15.08^\circ/\text{s}$ | **4.70°/s** | **-68.8% (Eliminated yaw hunting)** |
+| **Roll Angular Variation Rate** | $3.83^\circ/\text{s}$ | **1.72°/s** | **-55.1% (Solid, damped airframe)** |
+| **Mean Roll Tracking Error** | $2.04^\circ$ | **1.16°** | **-43.1%** |
+| **Mean Pitch Tracking Error** | $1.79^\circ$ | **1.12°** | **-37.4%** |
+| **Mean Yaw Tracking Error** | $10.35^\circ$ | **5.53°** | **-46.6%** |
+| **Servo** $`\alpha_0`$ **Slew Jerkiness** | $21.70^\circ/\text{s}$ | **11.80°/s** | **-45.6% (Smooth servo motion)** |
 
 ---
 
@@ -270,8 +270,8 @@ flowchart LR
 2. **Contact Dynamics & Simulator Realism**: High-order polyhedral CAD meshes must not be used directly as collision geometries in ODE/Bullet physics engines. Spherical contact modeling provides smooth analytical gradients required for stable multi-contact ground interactions.
 
 ### Future Research Roadmap
-- [ ] **Nonlinear Model Predictive Control (NMPC) on $SE(3)$**: Formulate real-time optimal control taking into account explicit servo rate limits ($\dot{\alpha}_{\max}, \dot{\beta}_{\max}$) and control allocation slack variables.
-- [ ] **$L_1$ Adaptive Disturbance Observer**: Estimate and reject real-time aerodynamic downwash interactions between adjacent propeller ducts during high-tilt transitions.
+- [ ] **Nonlinear Model Predictive Control (NMPC) on** $\mathrm{SE}(3)$: Formulate real-time optimal control taking into account explicit servo rate limits ($`\dot{\alpha}_{\max}, \dot{\beta}_{\max}`$) and control allocation slack variables.
+- [ ] $`\mathcal{L}_1`$ **Adaptive Disturbance Observer**: Estimate and reject real-time aerodynamic downwash interactions between adjacent propeller ducts during high-tilt transitions.
 - [ ] **Hardware-in-the-Loop (HIL) & Physical Prototype Deployment**: Port firmware to a custom carbon-fiber airframe equipped with Pixhawk 6X and CAN-bus servos.
 
 ---
