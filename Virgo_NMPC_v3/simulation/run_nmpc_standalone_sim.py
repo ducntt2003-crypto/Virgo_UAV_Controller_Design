@@ -195,12 +195,16 @@ def plot_nmpc_telemetry(df, output_path):
 
     # 5. Pod Thrust Actuation
     ax = axs[2, 0]
+    has_thrust = any(f'thrust_pod_{i}' in df for i in range(4))
     for i in range(4):
-        ax.plot(df['time'], df[f'thrust_pod_{i}'], label=f'Pod {i+1} Thrust')
+        if has_thrust:
+            ax.plot(df['time'], df[f'thrust_pod_{i}'], label=f'Pod {i+1} Thrust')
+        elif f'motor_{i}' in df:
+            ax.plot(df['time'], df[f'motor_{i}'], label=f'Motor {i} PWM')
     ax.axhline(11.18, color='k', linestyle=':', label='Hover Thrust (11.18N)')
-    ax.set_title('Actuator Allocation: Pod Thrusts', fontsize=12, fontweight='bold')
+    ax.set_title('Actuator Allocation: Pod Thrusts / Motors', fontsize=12, fontweight='bold')
     ax.set_xlabel('Time (s)')
-    ax.set_ylabel('Thrust (N)')
+    ax.set_ylabel('Thrust / PWM')
     ax.grid(True, linestyle=':', alpha=0.6)
     ax.legend(loc='upper right', ncol=2)
 
