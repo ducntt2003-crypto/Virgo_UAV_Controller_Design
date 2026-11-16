@@ -180,8 +180,8 @@ Virgo_NMPC_v3/
 │   ├── px4_mavlink_nmpc_bridge.py     # Direct MAVLink bridge for PX4 SITL & Gazebo
 │   └── virgo_nmpc_node.py             # ROS 2 Humble node (Micro-XRCE-DDS)
 └── docs/
-    ├── gazebo_nmpc_flight_1794796926.csv.gz       # Flight telemetry log (Gazebo Harmonic)
-    ├── gazebo_nmpc_flight_1794796926_analysis.png # 6-panel flight telemetry analysis plot
+    ├── gazebo_nmpc_flight_1794803331.csv.gz       # Flight telemetry log (Gazebo Harmonic)
+    ├── gazebo_nmpc_flight_1794803331_analysis.png # 6-panel flight telemetry analysis plot
     ├── gazebo_nmpc_vs_pid_comparison_benchmark.png # NMPC vs PID full Gazebo benchmark comparison
     ├── nmpc_square_decoupled_telemetry.csv.gz     # Standalone simulation telemetry
     └── nmpc_square_decoupled_analysis.png         # Standalone simulation plot
