@@ -161,16 +161,78 @@ void ActuatorEffectivenessVirgo::updateSetpoint(const matrix::Vector<float, NUM_
 		Vector3f{ _ly / _r,  _lx / _r, 0.0f}
 	};
 
+	// Mode gating: lock servos strictly upright (0°) during ground ops, takeoff, and landing
+	vehicle_land_detected_s land_detected{};
+	_vehicle_land_detected_sub.copy(&land_detected);
+
+	vehicle_local_position_s local_pos{};
+	_vehicle_local_position_sub.copy(&local_pos);
+
+	const float alt = -local_pos.z;
+	const float f_norm = fd_flu.norm();
+
+	// Servos locked strictly upright (0°) below 0.08m or on ground -> fixed UAV configuration for touchdown
+	const bool lock_servos_upright = land_detected.landed || (local_pos.z_valid && alt < 0.08f);
+
+	// Touchdown detection: vehicle is only on ground if land detector confirms landed OR vehicle has settled on deck at idle
+	// During active flight descent in air, full yaw reaction torque and attitude authority remain 100% active!
+	const bool is_on_ground = land_detected.landed ||
+				  (land_detected.ground_contact && f_norm < 0.15f) ||
+				  (local_pos.z_valid && alt < 0.05f && f_norm < 0.15f);
+
 	// -------------------------------------------------------------------------
-	// 2. Closed-Form Energy-Optimal Wrench Allocation (Adapted for H-Frame)
-	// Scaling normalized PX4 torques [-1, 1] by nominal arm hover thrust and arm spans.
+	// 2. Hybrid Dual-Layer Frequency-Divided Yaw Control with Parasitic Decoupling
 	// -------------------------------------------------------------------------
+	// Layer 1 (Servos): Smooth Low-Pass Filtered (~0.8 Hz) Tangential Vectoring
+	//   Completely isolates mechanical servos from fast rate loop feedback,
+	//   eliminating phase-lag limit cycle hunting while delivering up to 1.5 N*m
+	//   of steady-state yaw authority to reject aerodynamic drag moments.
+	if (lock_servos_upright) {
+		_tau_z_servo_lp = 0.0f;
+	} else {
+		const float alpha_yaw_lp = 0.025f; // ~0.8 Hz low-pass cutoff at 250 Hz loop
+		_tau_z_servo_lp += alpha_yaw_lp * (tau_z_flu - _tau_z_servo_lp);
+	}
 	const float arm_hover = 0.25f * _hover_throttle;
-	const float tau_x_scaled = tau_x_flu * (arm_hover / _ly);
-	const float tau_y_scaled = tau_y_flu * (arm_hover / _lx);
-	// Yaw is 100% controlled instantaneously via coaxial differential rotor reaction torque.
-	// Removing servo tangential tilt completely eliminates the 0.53 Hz phase-lag limit cycle.
-	const float tau_z_scaled = 0.0f;
+	const float tau_z_scaled = math::constrain(_tau_z_servo_lp * (arm_hover / _r) * 0.40f, -0.07f, 0.07f);
+
+	// Layer 2 (Rotors): Instantaneous Differential Rotor Reaction Torque
+	//   Provides zero-delay rate damping directly through BLDC coaxial motor pairs.
+	// Cross-Axis Parasitic Decoupling:
+	//   When pods are tilted by (alpha, beta), differential rotor reaction torque
+	//   projects onto vehicle body Roll and Pitch axes. We calculate this projection
+	//   from the current pod angles and subtract it from the Roll/Pitch allocation channels.
+	float sum_proj_x = 0.0f;
+	float sum_proj_y = 0.0f;
+	float sum_proj_z = 0.0f;
+	for (int i = 0; i < 4; ++i) {
+		const float cos_b = cosf(_beta_smoothed[i]);
+		const float sin_b = sinf(_beta_smoothed[i]);
+		const float sin_a = sinf(_alpha_smoothed[i]);
+		const float cos_a = cosf(_alpha_smoothed[i]);
+		// Unit vector of pod axis in FLU:
+		// x_flu = -sin(alpha)*cos(beta), y_flu = -sin(beta), z_flu = cos(alpha)*cos(beta)
+		sum_proj_x += -sin_a * cos_b;
+		sum_proj_y += -sin_b;
+		sum_proj_z += cos_a * cos_b;
+	}
+	const float avg_proj_x = 0.25f * sum_proj_x;
+	const float avg_proj_y = 0.25f * sum_proj_y;
+	const float avg_proj_z = math::max(0.25f * sum_proj_z, 0.60f);
+
+	// Boost rotor yaw differential by 1/avg_proj_z to maintain 100% yaw authority under tilt
+	const float yaw_rotor_diff = is_on_ground ? 0.0f : math::constrain((control_sp(2) / avg_proj_z) * 0.30f, -0.30f, 0.30f);
+
+	// Feedforward anti-parasitic cancellation:
+	// Differential reaction torque in FLU generates:
+	// tau_x_parasitic = yaw_rotor_diff * avg_proj_x
+	// tau_y_parasitic = yaw_rotor_diff * avg_proj_y
+	// Subtracting these keeps Roll and Pitch strictly decoupled from Yaw actions!
+	const float tau_x_decoupled = tau_x_flu - yaw_rotor_diff * avg_proj_x;
+	const float tau_y_decoupled = tau_y_flu - yaw_rotor_diff * avg_proj_y;
+
+	const float tau_x_scaled = tau_x_decoupled * (arm_hover / _ly);
+	const float tau_y_scaled = tau_y_decoupled * (arm_hover / _lx);
 
 	Vector3f t[4];
 
@@ -197,25 +259,6 @@ void ActuatorEffectivenessVirgo::updateSetpoint(const matrix::Vector<float, NUM_
 	       + kB * (-tau_x_scaled * 0.25f)
 	       + kB * (-tau_y_scaled * 0.25f)
 	       + t_psi[3] * (tau_z_scaled * 0.25f);
-
-	// Mode gating: lock servos strictly upright (0°) during ground ops, takeoff, and landing
-	vehicle_land_detected_s land_detected{};
-	_vehicle_land_detected_sub.copy(&land_detected);
-
-	vehicle_local_position_s local_pos{};
-	_vehicle_local_position_sub.copy(&local_pos);
-
-	const float alt = -local_pos.z;
-	const float f_norm = fd_flu.norm();
-
-	// Servos locked strictly upright (0°) below 0.08m or on ground -> fixed UAV configuration for touchdown
-	const bool lock_servos_upright = land_detected.landed || (local_pos.z_valid && alt < 0.08f);
-
-	// Touchdown detection: vehicle is only on ground if land detector confirms landed OR vehicle has settled on deck at idle
-	// During active flight descent in air, full yaw reaction torque and attitude authority remain 100% active!
-	const bool is_on_ground = land_detected.landed ||
-				  (land_detected.ground_contact && f_norm < 0.15f) ||
-				  (local_pos.z_valid && alt < 0.05f && f_norm < 0.15f);
 
 	// -------------------------------------------------------------------------
 	// 3. Extract Rotor Speeds & Gimbal Angles (Eq. 14, 15)
@@ -306,11 +349,9 @@ void ActuatorEffectivenessVirgo::updateSetpoint(const matrix::Vector<float, NUM_
 		throttle = math::constrain(throttle, _min_throttle, _max_throttle);
 
 		// Fast Instantaneous Reaction Torque for Coaxial Pairs (Zero Servo Delay):
-		// control_sp(2) is PX4 FRD Yaw torque (+ = Clockwise).
 		// Upper motor (m0: CCW) reaction torque is Clockwise (+).
 		// Lower motor (m1: CW) reaction torque is Counter-Clockwise (-).
-		// Coaxial differential reaction torque provides 100% of yaw control authority without moving servos!
-		const float yaw_rotor_diff = is_on_ground ? 0.0f : math::constrain(control_sp(2) * 0.25f, -0.25f, 0.25f);
+		// Coaxial differential reaction torque provides rate damping with zero phase lag.
 
 		const int m0_idx = 2 * i;     // Upper rotor (CCW)
 		const int m1_idx = 2 * i + 1; // Lower rotor (CW)

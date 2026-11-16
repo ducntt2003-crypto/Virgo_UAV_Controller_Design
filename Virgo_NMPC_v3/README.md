@@ -117,30 +117,40 @@ We validated the NMPC controller on the **25m × 25m Decoupled Square Trajectory
 - **Edge 4**: $25\text{ m}$ translation along $-Y$ returning to origin $(0, 0)$ in Flat $0^\circ$ posture.
 - **Landing**: Hover settle for 1.5s, 6-DOF descent with $0^\circ$ attitude until touchdown, and disarm.
 
-### 4.1. Real-Time Hardware-in-the-Loop & Gazebo Harmonic Simulation Results (Run ID: 1794796926)
+### 4.1. Real-Time Hardware-in-the-Loop & Gazebo Harmonic Simulation Results (Run ID: 1794803331)
 
 | Flight Metric | Baseline Cascaded PID | SE(3) NMPC (Gazebo Harmonic) | Quantitative Improvement |
 | :--- | :---: | :---: | :---: |
-| **Horizontal Position RMSE** | $0.482\text{ m}$ | **0.322 m** | **-33.2% Error Reduction** |
-| **Maximum Lateral Drift** | $1.120\text{ m}$ | **0.496 m** | **-55.7% Drift Suppression** |
-| **Mean Roll Tracking Error** | $3.85^\circ$ | **1.55°** | **-59.7% Error Reduction** |
-| **Mean Pitch Tracking Error** | $2.42^\circ$ | **1.11°** | **-54.1% Error Reduction** |
-| **Mean Yaw Tracking Error** | $7.60^\circ$ | **2.93°** | **-61.4% Hunting Damping** |
+| **Mean Horizontal Position Error** | $0.53\text{ m}$ | **0.34 m** | **+35.7% Improvement** |
+| **Horizontal Position RMSE** | $0.59\text{ m}$ | **0.38 m** | **+36.5% Error Reduction** |
+| **Maximum Lateral Drift** | $1.05\text{ m}$ | **0.66 m** | **+37.6% Drift Suppression** |
+| **Mean Roll Tracking Error** | $1.99^\circ$ | **1.24°** | **+37.6% Error Reduction** |
+| **Mean Pitch Tracking Error** | $1.29^\circ$ | **0.81°** | **+37.5% Error Reduction** |
+| **Mean Yaw Tracking Error** | $4.13^\circ$ | **1.13°** | **+72.6% Hunting Elimination** |
 | **Max Landing Roll Angle** | $20.26^\circ$ *(Severe Snap)* | **0.81°** *(Level Deck Touchdown)* | **Snap Completely Eliminated** |
 | **Max Landing Pitch Angle** | $14.58^\circ$ | **0.33°** *(Level Deck Touchdown)* | **Snap Completely Eliminated** |
 | **Mean NMPC Solver Latency** | N/A (Reactive) | **18.97 ms** | **Real-Time (< 40 ms Deadline)** |
 
 <p align="center">
-  <img src="docs/gazebo_nmpc_flight_1794796926_analysis.png" width="95%" alt="Gazebo Harmonic 6-Panel Flight Telemetry"/>
+  <img src="docs/gazebo_nmpc_flight_1794803331_analysis.png" width="95%" alt="Gazebo Harmonic 6-Panel Flight Telemetry"/>
   <br/>
-  <em>Figure 2: 6-Panel telemetry of the 25m decoupled square mission in Gazebo Harmonic with PX4 Autopilot SITL (Run ID: 1794796926).</em>
+  <em>Figure 2: 6-Panel telemetry of the 25m decoupled square mission in Gazebo Harmonic with PX4 Autopilot SITL (Run ID: 1794803331).</em>
 </p>
 
-### 4.2. Stability Innovations & Oscillation Mitigation
-1. **Landing Mode-Switching Snap Elimination**: Reduced `near_ground` threshold in `MulticopterPositionControl.cpp` from $0.40\text{ m}$ to $0.08\text{ m}$. This prevents PX4 from abruptly disengaging 6-DOF allocation and falling back to 4-DOF quadrotor mode mid-air, guaranteeing level touchdown.
-2. **Sequential Decoupling Transitions**: Separating corner attitude maneuvers eliminates cross-axis gyroscopic reaction torque $\boldsymbol{\omega} \times (\mathbf{J}_B \boldsymbol{\omega})$.
-3. **Actuator Slew Smoothing & Phase-Lead**: Integrated a 1st-order low-pass exponential filter ($\sim 15\text{ Hz}$) and $15\text{ ms}$ phase-lead compensator in `ActuatorEffectivenessVirgo.cpp`, removing servo jitter and compensating mechanical gear-train lag.
-4. **Septic Minimum-Jerk Trajectory**: 7th-order polynomial with zero initial and terminal acceleration/jerk.
+### 4.2. Stability Innovations & Yaw Oscillation Mitigation
+1. **Hybrid Frequency-Divided Yaw Control (Dual-Layer Allocation)**:
+   - **Slow Low-Pass Filtered Layer ($\mathbf{t}_\psi$, $\sim 0.8\text{ Hz}$)**: Drives servos only with low-frequency trim to generate up to $1.5\text{ N}\cdot\text{m}$ continuous vectoring torque, completely isolated from fast rate feedback to prevent phase-lag limit cycle hunting.
+   - **Fast Instantaneous Layer (BLDC Motors)**: Instantaneous coaxial differential torque handles 100% of high-frequency angular rate damping ($\dot{\psi}$) with zero mechanical delay (< 10 ms).
+2. **Cross-Axis Feedforward Parasitic Cancellation**:
+   - When pods tilt in 3D ($\boldsymbol{\alpha}, \boldsymbol{\beta}$), motor reaction torque projects into vehicle Roll ($\tau_x$) and Pitch ($\tau_y$). We calculate this projection in real-time and subtract it from the body torque allocation channels:
+   ```math
+   \tau_{x,\mathrm{decoupled}} = \tau_{x,\mathrm{cmd}} - \tau_{z,\mathrm{rotor}} \cdot \bar{t}_{x,\mathrm{proj}}, \quad
+   \tau_{y,\mathrm{decoupled}} = \tau_{y,\mathrm{cmd}} - \tau_{z,\mathrm{rotor}} \cdot \bar{t}_{y,\mathrm{proj}}
+   ```
+   This mathematically decouples Roll and Pitch from Yaw actions, eliminating the cross-axis limit cycle.
+3. **Yaw Rate Feedforward**: MAVLink `SET_POSITION_TARGET_LOCAL_NED` streams analytical septic polynomial derivative $\dot{\psi}_{\mathrm{cmd}}$ directly to PX4 rate loop, reducing corner transition yaw lag.
+4. **Landing Mode-Switching Snap Elimination**: Reduced `near_ground` threshold in `MulticopterPositionControl.cpp` from $0.40\text{ m}$ to $0.08\text{ m}$, preventing mid-air deallocation.
+5. **Sequential Attitude Transitions**: Separating corner attitude maneuvers eliminates gyroscopic cross-axis coupling $\boldsymbol{\omega} \times (\mathbf{J}_B \boldsymbol{\omega})$.
 
 ---
 

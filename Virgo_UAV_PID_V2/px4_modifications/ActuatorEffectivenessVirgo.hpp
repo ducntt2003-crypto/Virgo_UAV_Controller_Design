@@ -100,4 +100,7 @@ private:
 	float _beta_smoothed[4]{0.0f, 0.0f, 0.0f, 0.0f};
 	float _d_alpha_filtered[4]{0.0f, 0.0f, 0.0f, 0.0f};
 	float _d_beta_filtered[4]{0.0f, 0.0f, 0.0f, 0.0f};
+
+	// Low-pass filtered yaw allocation for anti-hunting servo trim (~0.8 Hz)
+	float _tau_z_servo_lp{0.0f};
 };

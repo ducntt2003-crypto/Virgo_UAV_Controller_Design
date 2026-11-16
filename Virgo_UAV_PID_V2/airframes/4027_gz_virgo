@@ -52,10 +52,10 @@ param set-default MC_ROLLRATE_I 0.10
 param set-default MC_PITCHRATE_I 0.10
 param set-default MC_ROLLRATE_D 0.0055
 param set-default MC_PITCHRATE_D 0.0060
-param set-default MC_YAWRATE_P 0.20
-param set-default MC_YAWRATE_I 0.05
-param set-default MC_YAWRATE_D 0.0035
-param set-default MC_YR_INT_LIM 0.20
+param set-default MC_YAWRATE_P 0.22
+param set-default MC_YAWRATE_I 0.08
+param set-default MC_YAWRATE_D 0.0055
+param set-default MC_YR_INT_LIM 0.25
 param set-default MC_YAWRATE_MAX 120.0
 param set-default MC_YAW_TQ_CUTOFF 20.0
 

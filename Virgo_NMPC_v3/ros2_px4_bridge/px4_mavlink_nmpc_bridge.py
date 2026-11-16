@@ -61,6 +61,7 @@ class PX4MavlinkNMPCFlightRunner:
         self.sp_vel = np.zeros(3)
         self.sp_acc = np.zeros(3)
         self.sp_att = np.zeros(3)
+        self.sp_yaw_rate = 0.0
 
         self.has_pos = False
         self.has_att = False
@@ -121,7 +122,7 @@ class PX4MavlinkNMPCFlightRunner:
 
     def _setpoint_stream_loop(self):
         """Continuously streams setpoints and tilt angles to PX4 at 25 Hz, and logs telemetry."""
-        type_mask = 0b0000100000000000  # Pos + Vel + Acc + Yaw
+        type_mask = 0b0000000000000000  # Pos + Vel + Acc + Yaw + YawRate feedforward
         dt = 0.04
         start_time = time.time()
 
@@ -135,7 +136,7 @@ class PX4MavlinkNMPCFlightRunner:
                     float(self.sp_pos[0]), float(self.sp_pos[1]), float(self.sp_pos[2]),
                     float(self.sp_vel[0]), float(self.sp_vel[1]), float(self.sp_vel[2]),
                     float(self.sp_acc[0]), float(self.sp_acc[1]), float(self.sp_acc[2]),
-                    float(self.sp_att[2]), 0.0
+                    float(self.sp_att[2]), float(self.sp_yaw_rate)
                 )
 
                 if self.send_debug_vect:
@@ -233,13 +234,17 @@ class PX4MavlinkNMPCFlightRunner:
             elapsed = time.time() - t_start
             if elapsed >= duration:
                 self.sp_att = np.array(att_end, dtype=float)
+                self.sp_yaw_rate = 0.0
                 break
             tau = elapsed / duration
             # Septic polynomial (Zero jerk at transition boundaries)
             s = 35.0 * (tau**4) - 84.0 * (tau**5) + 70.0 * (tau**6) - 20.0 * (tau**7)
+            s_dot = (140.0 * (tau**3) - 420.0 * (tau**4) + 420.0 * (tau**5) - 140.0 * (tau**6)) / duration
             self.sp_att = att_start + (att_end - att_start) * s
+            self.sp_yaw_rate = float((att_end[2] - att_start[2]) * s_dot)
             time.sleep(0.04)
 
+        self.sp_yaw_rate = 0.0
         t_hold = time.time()
         while time.time() - t_hold < hold_time and self.running:
             time.sleep(0.05)
@@ -292,9 +297,12 @@ class PX4MavlinkNMPCFlightRunner:
                   f"NMPC: {ctrl['solve_time_ms']:4.1f}ms", end="")
             time.sleep(0.04)
 
-        # Settle at corner for 0.8s
+        # Settle at corner until velocity is smoothly damped
         t_corner = time.time()
-        while time.time() - t_corner < 0.8 and self.running:
+        while time.time() - t_corner < 3.5 and self.running:
+            vel_mag = np.linalg.norm(self.vel[:2])
+            if vel_mag < 0.20 and (time.time() - t_corner > 1.4):
+                break
             time.sleep(0.04)
 
     def run_benchmark(self):
@@ -312,21 +320,21 @@ class PX4MavlinkNMPCFlightRunner:
         self.execute_segment(p0, p1, lambda t: (deg30, 0.0, 0.0), f"CẠNH 1 (+X, Roll=+30° [L={L:.0f}m])")
 
         # 2. Tại (+L, 0): Chuyển Roll +30° sang Pitch +30° (tuần tự loại bỏ mô-men con quay hồi chuyển)
-        self.transition_attitude(np.array([deg30, 0.0, 0.0]), np.zeros(3), 2.6, 0.8, "2a. Tại (+L, 0): Roll 30° -> 0°")
-        self.transition_attitude(np.zeros(3), np.array([0.0, deg30, 0.0]), 2.6, 1.0, "2b. Tại (+L, 0): Pitch 0° -> 30°")
+        self.transition_attitude(np.array([deg30, 0.0, 0.0]), np.zeros(3), 3.2, 1.2, "2a. Tại (+L, 0): Roll 30° -> 0°")
+        self.transition_attitude(np.zeros(3), np.array([0.0, deg30, 0.0]), 3.2, 1.5, "2b. Tại (+L, 0): Pitch 0° -> 30°")
 
         # Cạnh 2: (+L, 0) -> (+L, +L) giữ cố định Pitch +30°
         self.execute_segment(p1, p2, lambda t: (0.0, deg30, 0.0), f"CẠNH 2 (+Y, Pitch=+30° [L={L:.0f}m])")
 
         # 3. Tại (+L, +L): Chuyển Pitch +30° sang Yaw +30° (tuần tự loại bỏ ghép trục Pitch-Yaw)
-        self.transition_attitude(np.array([0.0, deg30, 0.0]), np.zeros(3), 2.6, 0.8, "3a. Tại (+L, +L): Pitch 30° -> 0°")
-        self.transition_attitude(np.zeros(3), np.array([0.0, 0.0, deg30]), 3.0, 1.0, "3b. Tại (+L, +L): Yaw 0° -> 30°")
+        self.transition_attitude(np.array([0.0, deg30, 0.0]), np.zeros(3), 3.2, 1.2, "3a. Tại (+L, +L): Pitch 30° -> 0°")
+        self.transition_attitude(np.zeros(3), np.array([0.0, 0.0, deg30]), 3.2, 1.5, "3b. Tại (+L, +L): Yaw 0° -> 30°")
 
         # Cạnh 3: (+L, +L) -> (0, +L) giữ cố định Yaw +30°
         self.execute_segment(p2, p3, lambda t: (0.0, 0.0, deg30), f"CẠNH 3 (-X, Yaw=+30° [L={L:.0f}m])")
 
         # 4. Tại (0, +L): Chuyển về Flat 0°
-        self.transition_attitude(np.array([0.0, 0.0, deg30]), np.zeros(3), 3.0, 1.0, "4. Tại (0, +L): Yaw 30° -> Flat 0°")
+        self.transition_attitude(np.array([0.0, 0.0, deg30]), np.zeros(3), 3.2, 1.5, "4. Tại (0, +L): Yaw 30° -> Flat 0°")
 
         # Cạnh 4: (0, +L) -> (0, 0) bay bình thường Flat 0° về gốc
         self.execute_segment(p3, p0, lambda t: (0.0, 0.0, 0.0), f"CẠNH 4 (-Y, Flat 0° [L={L:.0f}m])")
