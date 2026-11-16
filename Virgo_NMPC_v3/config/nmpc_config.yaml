@@ -1,0 +1,52 @@
+# ==============================================================================
+# Virgo OMAV SE(3) NMPC Solver Configuration
+# CasADi / ACADOS Real-Time Iteration Settings
+# ==============================================================================
+
+horizon:
+  N: 20                            # Number of shooting intervals
+  dt: 0.04                         # Discretization sampling time (s) -> 25 Hz
+  T_f: 0.8                         # Total prediction horizon length: N * dt = 0.8s
+
+weights:
+  # State Tracking Errors: x = [p(3), v(3), q(4), omega(3), alpha(4), beta(4)]
+  # Position error weights (X, Y, Z) in World NED frame
+  Q_pos: [60.0, 60.0, 90.0]
+
+  # Linear velocity damping weights (Vx, Vy, Vz)
+  Q_vel: [8.0, 8.0, 12.0]
+
+  # Attitude error weights on SO(3) (geodesic / quaternion vector part)
+  Q_att: [40.0, 40.0, 60.0]
+
+  # Angular rate damping weights (p, q, r)
+  Q_omega: [4.0, 4.0, 8.0]
+
+  # Servo angle regularization (prevents unnecessary tilting, encourages upright posture)
+  Q_servo_alpha: [0.5, 0.5, 0.5, 0.5]
+  Q_servo_beta:  [0.5, 0.5, 0.5, 0.5]
+
+  # Control Input Weights: u = [T_1..4 (4), dot_alpha_1..4 (4), dot_beta_1..4 (4)]
+  # Pod thrust magnitude relative to nominal hover
+  R_thrust: [0.05, 0.05, 0.05, 0.05]
+
+  # Servo commanded slew rate penalties
+  R_dot_alpha: [0.02, 0.02, 0.02, 0.02]
+  R_dot_beta:  [0.02, 0.02, 0.02, 0.02]
+
+  # Terminal State Multiplier (Lyapunov stability condition)
+  terminal_multiplier: 2.5
+
+solver:
+  integrator: "ERK4"               # Explicit Runge-Kutta 4th order
+  qp_solver: "PARTIAL_CONDENSING_HPIPM"
+  nlp_solver: "SQP_RTI"            # Real-Time Iteration
+  max_iter: 1                      # RTI performs 1 SQP iteration per sampling step
+  tol: 1.0e-4
+  print_level: 0
+
+safety:
+  max_solve_time_ms: 15.0          # Watchdog threshold before fallback
+  auto_land_on_failure: true
+  min_altitude_ned: -15.0          # Ceiling: 15m AGL
+  max_altitude_ned: -0.1           # Floor threshold for ground detection

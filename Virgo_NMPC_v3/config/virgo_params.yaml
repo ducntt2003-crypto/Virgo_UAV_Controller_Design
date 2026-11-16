@@ -1,0 +1,41 @@
+# ==============================================================================
+# Virgo OMAV Physical & CAD Specifications
+# Aligned with MorphQuad (arXiv:2607.02764) and AUV_USDF_V2
+# ==============================================================================
+
+vehicle:
+  name: "Virgo_OMAV_V3"
+  mass: 4.56                       # Total all-up takeoff mass (kg)
+  gravity: [0.0, 0.0, 9.80665]     # Gravitational acceleration vector (NED: +Z is Down) (m/s^2)
+
+inertia:
+  J_xx: 0.0854                     # Roll axis inertia (kg*m^2)
+  J_yy: 0.0921                     # Pitch axis inertia (kg*m^2)
+  J_zz: 0.1458                     # Yaw axis inertia (kg*m^2)
+
+geometry:
+  L_x: 0.19899                     # Longitudinal half-length (CoM to arm pitch axis) (m)
+  L_y: 0.19742                     # Lateral half-length (CoM to pod pivot roll axis) (m)
+  # Pod nominal pivot locations relative to CoM in Body Frame B:
+  pods:
+    pod_1: [ 0.19899, -0.19742, 0.0]  # Front-Right (FR)
+    pod_2: [ 0.19899,  0.19742, 0.0]  # Front-Left  (FL)
+    pod_3: [-0.19899,  0.19742, 0.0]  # Rear-Left   (RL)
+    pod_4: [-0.19899, -0.19742, 0.0]  # Rear-Right  (RR)
+
+propulsion:
+  num_pods: 4
+  motors_per_pod: 2                # Coaxial counter-rotating dual rotor
+  c_T: 8.548e-6                    # Rotor aerodynamic lift constant (N*s^2/rad^2)
+  c_Q_ratio: 0.06                  # Propeller drag-to-thrust ratio: c_Q = 0.06 * c_T
+  c_Q: 5.1288e-7                   # Aerodynamic reaction torque constant (N*m*s^2/rad^2)
+  omega_max: 1200.0                # Max rotor angular speed (rad/s)
+  thrust_min_per_pod: 0.5          # Minimum individual pod thrust (N)
+  thrust_max_per_pod: 18.5         # Maximum continuous pod thrust (N)
+
+servos:
+  num_servos: 8                    # 4 outer pitch (alpha) + 4 inner roll (beta)
+  angle_min: -1.570796             # -pi/2 rad (-90 deg)
+  angle_max:  1.570796             # +pi/2 rad (+90 deg)
+  rate_limit: 10.0                 # Max slew rate (rad/s) (~573 deg/s)
+  time_constant: 0.08              # 1st-order equivalent actuator lag (s)
