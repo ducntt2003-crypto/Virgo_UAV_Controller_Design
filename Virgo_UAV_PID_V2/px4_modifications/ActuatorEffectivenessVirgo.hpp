@@ -91,4 +91,13 @@ private:
 	// Mode gating: lock servos upright during takeoff, landing, and ground operations
 	uORB::Subscription _vehicle_land_detected_sub{ORB_ID(vehicle_land_detected)};
 	uORB::Subscription _vehicle_local_position_sub{ORB_ID(vehicle_local_position)};
+
+	// Servo phase-lead compensation to cancel mechanical actuator delay
+	hrt_abstime _last_alloc_time{0};
+	float _alpha_prev[4]{0.0f, 0.0f, 0.0f, 0.0f};
+	float _beta_prev[4]{0.0f, 0.0f, 0.0f, 0.0f};
+	float _alpha_smoothed[4]{0.0f, 0.0f, 0.0f, 0.0f};
+	float _beta_smoothed[4]{0.0f, 0.0f, 0.0f, 0.0f};
+	float _d_alpha_filtered[4]{0.0f, 0.0f, 0.0f, 0.0f};
+	float _d_beta_filtered[4]{0.0f, 0.0f, 0.0f, 0.0f};
 };

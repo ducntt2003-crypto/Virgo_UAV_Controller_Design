@@ -100,18 +100,24 @@ class PX4MavlinkNMPCFlightRunner:
                 self.has_att = True
 
             elif msg_type == 'SERVO_OUTPUT_RAW':
-                raw = [getattr(msg, f'servo{i+1}_raw', 0) for i in range(16)]
-                def _decode_sv(v):
-                    if 0 < v <= 1000:
-                        return (v - 500.0) / 500.0 * (math.pi / 2.0)
-                    elif 1000 < v <= 2000:
-                        return (v - 1500.0) / 500.0 * (math.pi / 2.0)
-                    elif abs(v) <= 1.05:
-                        return v * (math.pi / 2.0)
-                    return 0.0
-
-                self.motors = np.array([raw[i] for i in range(8)])
-                self.servos = np.array([_decode_sv(raw[i + 8]) for i in range(8)])
+                port = getattr(msg, 'port', 0)
+                raw = [getattr(msg, f'servo{i}_raw', 0) for i in range(1, 9)]
+                if port == 0:
+                    self.motors = np.array([
+                        (v - 100.0) / 1100.0 if (100 <= v <= 1200)
+                        else (v / 1000.0 if v <= 1.0 else (v - 1000.0) / 1000.0)
+                        for v in raw
+                    ])
+                elif port == 1:
+                    def _decode_sv(v):
+                        if 0 <= v <= 1000:
+                            return (v - 500.0) / 500.0 * (math.pi / 2.0)
+                        elif 1000 < v <= 2000:
+                            return (v - 1500.0) / 500.0 * (math.pi / 2.0)
+                        elif abs(v) <= 1.05:
+                            return v * (math.pi / 2.0)
+                        return 0.0
+                    self.servos = np.array([_decode_sv(v) for v in raw])
 
     def _setpoint_stream_loop(self):
         """Continuously streams setpoints and tilt angles to PX4 at 25 Hz, and logs telemetry."""
@@ -229,7 +235,8 @@ class PX4MavlinkNMPCFlightRunner:
                 self.sp_att = np.array(att_end, dtype=float)
                 break
             tau = elapsed / duration
-            s = 10.0 * (tau**3) - 15.0 * (tau**4) + 6.0 * (tau**5)
+            # Septic polynomial (Zero jerk at transition boundaries)
+            s = 35.0 * (tau**4) - 84.0 * (tau**5) + 70.0 * (tau**6) - 20.0 * (tau**7)
             self.sp_att = att_start + (att_end - att_start) * s
             time.sleep(0.04)
 
@@ -255,10 +262,10 @@ class PX4MavlinkNMPCFlightRunner:
                 break
 
             tau = elapsed / dur
-            # Quintic polynomial
-            s = 10.0 * (tau**3) - 15.0 * (tau**4) + 6.0 * (tau**5)
-            s_dot = (30.0 * (tau**2) - 60.0 * (tau**3) + 30.0 * (tau**4)) / dur
-            s_ddot = (60.0 * tau - 180.0 * (tau**2) + 120.0 * (tau**3)) / (dur**2)
+            # Septic polynomial (Zero Jerk trajectory for vibration-free cruising)
+            s = 35.0 * (tau**4) - 84.0 * (tau**5) + 70.0 * (tau**6) - 20.0 * (tau**7)
+            s_dot = (140.0 * (tau**3) - 420.0 * (tau**4) + 420.0 * (tau**5) - 140.0 * (tau**6)) / dur
+            s_ddot = (420.0 * (tau**2) - 1680.0 * (tau**3) + 2100.0 * (tau**4) - 840.0 * (tau**5)) / (dur**2)
 
             self.sp_pos = p_start + delta_p * s
             self.sp_vel = delta_p * s_dot
@@ -285,7 +292,10 @@ class PX4MavlinkNMPCFlightRunner:
                   f"NMPC: {ctrl['solve_time_ms']:4.1f}ms", end="")
             time.sleep(0.04)
 
-        time.sleep(0.5)
+        # Settle at corner for 0.8s
+        t_corner = time.time()
+        while time.time() - t_corner < 0.8 and self.running:
+            time.sleep(0.04)
 
     def run_benchmark(self):
         L = self.L
@@ -301,34 +311,44 @@ class PX4MavlinkNMPCFlightRunner:
         # Cạnh 1: (0, 0) -> (+L, 0) giữ cố định Roll +30°
         self.execute_segment(p0, p1, lambda t: (deg30, 0.0, 0.0), f"CẠNH 1 (+X, Roll=+30° [L={L:.0f}m])")
 
-        # 2. Tại (+L, 0): Chuyển Roll +30° sang Pitch +30°
-        self.transition_attitude(np.array([deg30, 0.0, 0.0]), np.array([0.0, deg30, 0.0]), 3.5, 1.5, "2. Tại (+L, 0): Roll 30° -> Pitch 30°")
+        # 2. Tại (+L, 0): Chuyển Roll +30° sang Pitch +30° (tuần tự loại bỏ mô-men con quay hồi chuyển)
+        self.transition_attitude(np.array([deg30, 0.0, 0.0]), np.zeros(3), 2.6, 0.8, "2a. Tại (+L, 0): Roll 30° -> 0°")
+        self.transition_attitude(np.zeros(3), np.array([0.0, deg30, 0.0]), 2.6, 1.0, "2b. Tại (+L, 0): Pitch 0° -> 30°")
 
         # Cạnh 2: (+L, 0) -> (+L, +L) giữ cố định Pitch +30°
         self.execute_segment(p1, p2, lambda t: (0.0, deg30, 0.0), f"CẠNH 2 (+Y, Pitch=+30° [L={L:.0f}m])")
 
-        # 3. Tại (+L, +L): Chuyển Pitch +30° sang Yaw +30°
-        self.transition_attitude(np.array([0.0, deg30, 0.0]), np.array([0.0, 0.0, deg30]), 3.5, 1.5, "3. Tại (+L, +L): Pitch 30° -> Yaw 30°")
+        # 3. Tại (+L, +L): Chuyển Pitch +30° sang Yaw +30° (tuần tự loại bỏ ghép trục Pitch-Yaw)
+        self.transition_attitude(np.array([0.0, deg30, 0.0]), np.zeros(3), 2.6, 0.8, "3a. Tại (+L, +L): Pitch 30° -> 0°")
+        self.transition_attitude(np.zeros(3), np.array([0.0, 0.0, deg30]), 3.0, 1.0, "3b. Tại (+L, +L): Yaw 0° -> 30°")
 
         # Cạnh 3: (+L, +L) -> (0, +L) giữ cố định Yaw +30°
         self.execute_segment(p2, p3, lambda t: (0.0, 0.0, deg30), f"CẠNH 3 (-X, Yaw=+30° [L={L:.0f}m])")
 
         # 4. Tại (0, +L): Chuyển về Flat 0°
-        self.transition_attitude(np.array([0.0, 0.0, deg30]), np.zeros(3), 3.5, 1.5, "4. Tại (0, +L): Yaw 30° -> Flat 0°")
+        self.transition_attitude(np.array([0.0, 0.0, deg30]), np.zeros(3), 3.0, 1.0, "4. Tại (0, +L): Yaw 30° -> Flat 0°")
 
         # Cạnh 4: (0, +L) -> (0, 0) bay bình thường Flat 0° về gốc
         self.execute_segment(p3, p0, lambda t: (0.0, 0.0, 0.0), f"CẠNH 4 (-Y, Flat 0° [L={L:.0f}m])")
 
     def land_and_disarm(self):
-        print(f"\n\033[1;33m[Hạ cánh]\033[0m Khóa servo 0° thẳng đứng, hạ cánh êm tại gốc (0, 0)...")
-        self.send_debug_vect = False
+        print(f"\n\033[1;33m[Hạ cánh]\033[0m Duy trì chế độ 6-DOF phẳng 0°, hạ cánh êm tại gốc (0, 0)...")
+        # Giữ 6-DOF hoạt động với setpoint góc [0, 0, 0] để tránh giật đột ngột
+        self.send_debug_vect = True
+        self.sp_att = np.zeros(3)
+        self.sp_pos[0] = 0.0
+        self.sp_pos[1] = 0.0
+        self.sp_vel = np.zeros(3)
+        self.sp_acc = np.zeros(3)
+
+        # Ổn định vận tốc ngang tại gốc (0, 0) trước khi hạ độ cao
+        t_settle = time.time()
+        while time.time() - t_settle < 1.5 and self.running:
+            time.sleep(0.05)
+
         init_z = self.sp_pos[2]
         descend_speed = 0.25
         t_desc = time.time()
-
-        self.sp_pos[0] = 0.0
-        self.sp_pos[1] = 0.0
-        self.sp_att = np.zeros(3)
 
         while self.running:
             elapsed = time.time() - t_desc
@@ -345,6 +365,7 @@ class PX4MavlinkNMPCFlightRunner:
 
         print("\n\033[1;32m[Chạm đất]\033[0m Đã hạ cánh an toàn. Ngắt động cơ (DISARM)...")
         self.streaming = False
+        self.send_debug_vect = False
         time.sleep(0.1)
 
         for _ in range(5):
@@ -386,7 +407,7 @@ class PX4MavlinkNMPCFlightRunner:
         pos_err = np.sqrt((df_fl['pos_x'] - df_fl['sp_x'])**2 + (df_fl['pos_y'] - df_fl['sp_y'])**2)
         roll_err = np.abs(np.degrees(df_fl['roll'] - df_fl['sp_roll']))
         pitch_err = np.abs(np.degrees(df_fl['pitch'] - df_fl['sp_pitch']))
-        yaw_err = np.abs(np.degrees(df_fl['yaw'] - df_fl['sp_yaw']))
+        yaw_err = np.abs(np.degrees((df_fl['yaw'] - df_fl['sp_yaw'] + np.pi) % (2*np.pi) - np.pi))
 
         print("\n" + "=" * 76)
         print("  \033[1;32mKẾT QUẢ BAY KIỂM NGHIỆM TRONG GAZEBO HARMONIC (SE(3) NMPC RUNNER)\033[0m")

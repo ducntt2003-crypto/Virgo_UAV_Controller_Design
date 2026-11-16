@@ -293,6 +293,10 @@ void MulticopterPositionControl::parameters_update(bool force)
 			_hover_thrust_initialized = true;
 		}
 
+		if (_param_airframe.get() == 18) {
+			_control.setControlMode(VirgoControlMode::FUZZY_PID);
+		}
+
 		// initialize vectors from params and enforce constraints
 		_param_mpc_tko_speed.set(math::min(_param_mpc_tko_speed.get(), _param_mpc_z_vel_max_up.get()));
 		_param_mpc_land_speed.set(math::min(_param_mpc_land_speed.get(), _param_mpc_z_vel_max_dn.get()));
@@ -563,6 +567,14 @@ void MulticopterPositionControl::Run()
 				_control.resetIntegralXY();
 			}
 
+			if (_param_airframe.get() == 18) {
+				const float alt = -vehicle_local_position.z;
+				if (vehicle_local_position.z_valid && alt < 0.30f) {
+					// While on ground or liftoff (< 0.30m), freeze horizontal integrators to avoid ground friction windup
+					_control.resetIntegralXY();
+				}
+			}
+
 			_control.setState(states);
 
 			const hrt_abstime now = hrt_absolute_time();
@@ -606,32 +618,37 @@ void MulticopterPositionControl::Run()
 			vehicle_attitude_setpoint_s attitude_setpoint{};
 			_control.getAttitudeSetpoint(attitude_setpoint);
 
-			if (_param_airframe.get() == 16 || _param_airframe.get() == 17 || _param_airframe.get() == 18) { // Tilting Multirotor, Virgo OMAV, or MorphEUS OMAV
+			// Update desired body angles for tilting multirotor / OMAV (from MAVLink debug_vect 'tilt_angle')
+			if (_tilting_mc_angles_sub.updated()) {
+				tilting_mc_desired_angles_s tilting_mc_angles_sp;
+
+				if (_tilting_mc_angles_sub.copy(&tilting_mc_angles_sp) &&
+				    (tilting_mc_angles_sp.timestamp > _last_angles_setpoint)) {
+
+					if (_param_tilting_type.get() == 0 && _param_mpc_pitch_on_tilt.get()) {
+						_tilting_mc_pitch_sp = math::constrain(tilting_mc_angles_sp.pitch_body,
+							math::radians(_param_des_pitch_min.get()), math::radians(_param_des_pitch_max.get()));
+
+					} else if (_param_tilting_type.get() == 1) {
+						_tilting_mc_pitch_sp = math::constrain(tilting_mc_angles_sp.pitch_body,
+							math::radians(_param_des_pitch_min.get()), math::radians(_param_des_pitch_max.get()));
+						_tilting_mc_roll_sp = math::constrain(tilting_mc_angles_sp.roll_body,
+							math::radians(_param_des_roll_min.get()), math::radians(_param_des_roll_max.get()));
+					}
+
+					_last_angles_setpoint = tilting_mc_angles_sp.timestamp;
+				}
+			}
+
+			const hrt_abstime t_now_eval = hrt_absolute_time();
+			const bool is_6dof_active = (_last_angles_setpoint > 0) && (t_now_eval - _last_angles_setpoint < 350_ms);
+			const float alt_eval = -vehicle_local_position.z;
+			const bool near_ground = _vehicle_land_detected.landed || (vehicle_local_position.z_valid && (alt_eval < 0.08f));
+
+			if ((_param_airframe.get() == 16 || _param_airframe.get() == 17 || _param_airframe.get() == 18) && is_6dof_active && !near_ground) { // Tilting Multirotor, Virgo OMAV, or MorphEUS OMAV in 6-DOF mode
 				matrix::Eulerf attitude_euler(matrix::Quatf(attitude_setpoint.q_d));
 				float roll_body = attitude_euler.phi();
 				float pitch_body = attitude_euler.theta();
-
-				// Consider the desired body angle
-				if (_tilting_mc_angles_sub.updated()) {
-					tilting_mc_desired_angles_s tilting_mc_angles_sp;
-
-					if (_tilting_mc_angles_sub.copy(&tilting_mc_angles_sp) &&
-					    (tilting_mc_angles_sp.timestamp > _last_angles_setpoint)) {
-
-						if (_param_tilting_type.get() == 0 && _param_mpc_pitch_on_tilt.get()) {
-							_tilting_mc_pitch_sp = math::constrain(tilting_mc_angles_sp.pitch_body,
-								math::radians(_param_des_pitch_min.get()), math::radians(_param_des_pitch_max.get()));
-
-						} else if (_param_tilting_type.get() == 1) {
-							_tilting_mc_pitch_sp = math::constrain(tilting_mc_angles_sp.pitch_body,
-								math::radians(_param_des_pitch_min.get()), math::radians(_param_des_pitch_max.get()));
-							_tilting_mc_roll_sp = math::constrain(tilting_mc_angles_sp.roll_body,
-								math::radians(_param_des_roll_min.get()), math::radians(_param_des_roll_max.get()));
-						}
-
-						_last_angles_setpoint = tilting_mc_angles_sp.timestamp;
-					}
-				}
 
 				// For the H-tilting multirotor the tilt_servo angle must always be updated
 				if (_param_tilting_type.get() == 0 && _param_mpc_pitch_on_tilt.get()) {
@@ -671,8 +688,8 @@ void MulticopterPositionControl::Run()
 					const float pitch_dev = fabsf(matrix::wrap_pi(pitch_sp));
 					const float max_dev = math::max(roll_dev, pitch_dev);
 					if (max_dev > 0.8f) {
-						thrust_world(0) = math::constrain(thrust_world(0), -0.15f, 0.15f);
-						thrust_world(1) = math::constrain(thrust_world(1), -0.15f, 0.15f);
+						thrust_world(0) = math::constrain(thrust_world(0), -0.35f, 0.35f);
+						thrust_world(1) = math::constrain(thrust_world(1), -0.35f, 0.35f);
 					}
 
 					Vector3f thrust_body_vec = R_actual.transpose() * thrust_world;

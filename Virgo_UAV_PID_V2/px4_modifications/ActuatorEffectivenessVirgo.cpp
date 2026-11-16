@@ -168,8 +168,9 @@ void ActuatorEffectivenessVirgo::updateSetpoint(const matrix::Vector<float, NUM_
 	const float arm_hover = 0.25f * _hover_throttle;
 	const float tau_x_scaled = tau_x_flu * (arm_hover / _ly);
 	const float tau_y_scaled = tau_y_flu * (arm_hover / _lx);
-	// Soften servo yaw vectoring contribution to eliminate phase-lag limit cycle
-	const float tau_z_scaled = tau_z_flu * (arm_hover / _r) * 0.35f;
+	// Yaw is 100% controlled instantaneously via coaxial differential rotor reaction torque.
+	// Removing servo tangential tilt completely eliminates the 0.53 Hz phase-lag limit cycle.
+	const float tau_z_scaled = 0.0f;
 
 	Vector3f t[4];
 
@@ -207,8 +208,8 @@ void ActuatorEffectivenessVirgo::updateSetpoint(const matrix::Vector<float, NUM_
 	const float alt = -local_pos.z;
 	const float f_norm = fd_flu.norm();
 
-	// Servos locked strictly upright (0°) below 0.40m or on ground -> fixed UAV configuration for takeoff/landing
-	const bool lock_servos_upright = land_detected.landed || (local_pos.z_valid && alt < 0.40f);
+	// Servos locked strictly upright (0°) below 0.08m or on ground -> fixed UAV configuration for touchdown
+	const bool lock_servos_upright = land_detected.landed || (local_pos.z_valid && alt < 0.08f);
 
 	// Touchdown detection: vehicle is only on ground if land detector confirms landed OR vehicle has settled on deck at idle
 	// During active flight descent in air, full yaw reaction torque and attitude authority remain 100% active!
@@ -250,10 +251,44 @@ void ActuatorEffectivenessVirgo::updateSetpoint(const matrix::Vector<float, NUM_
 		}
 
 		// ---------------------------------------------------------------------
-		// 4. Map to Physical Actuators (FRD Gazebo Convention)
+		// 4. Map to Physical Actuators (FRD Gazebo Convention) with Phase-Lead
 		// ---------------------------------------------------------------------
-		const float joint_pitch = math::constrain(alpha_i, -M_PI_2_F, M_PI_2_F);
-		const float joint_roll  = math::constrain(beta_i, -M_PI_2_F, M_PI_2_F);
+		const hrt_abstime now_us = hrt_absolute_time();
+		float dt_alloc = (_last_alloc_time > 0) ? (float)(now_us - _last_alloc_time) * 1e-6f : 0.002f;
+		dt_alloc = math::constrain(dt_alloc, 0.001f, 0.02f);
+		if (i == 3) {
+			_last_alloc_time = now_us;
+		}
+
+		if (lock_servos_upright) {
+			alpha_i = 0.0f;
+			beta_i  = 0.0f;
+			_alpha_prev[i] = 0.0f;
+			_beta_prev[i]  = 0.0f;
+			_alpha_smoothed[i] = 0.0f;
+			_beta_smoothed[i]  = 0.0f;
+			_d_alpha_filtered[i] = 0.0f;
+			_d_beta_filtered[i]  = 0.0f;
+		} else {
+			// Low-pass filter raw servo angle commands to eliminate high-frequency chatter from sensor noise
+			const float filter_alpha = 0.25f; // Alpha filter ~15 Hz cut-off
+			_alpha_smoothed[i] += filter_alpha * (alpha_i - _alpha_smoothed[i]);
+			_beta_smoothed[i]  += filter_alpha * (beta_i  - _beta_smoothed[i]);
+
+			float d_alpha = (_alpha_smoothed[i] - _alpha_prev[i]) / dt_alloc;
+			float d_beta  = (_beta_smoothed[i]  - _beta_prev[i])  / dt_alloc;
+			_alpha_prev[i] = _alpha_smoothed[i];
+			_beta_prev[i]  = _beta_smoothed[i];
+
+			// Low-pass filter the derivative to avoid sensor noise amplification
+			_d_alpha_filtered[i] = 0.85f * _d_alpha_filtered[i] + 0.15f * d_alpha;
+			_d_beta_filtered[i]  = 0.85f * _d_beta_filtered[i]  + 0.15f * d_beta;
+		}
+
+		// 15ms phase-lead feedforward to cancel servo mechanical delay in Gazebo without amplifying high-frequency noise
+		const float tau_lead = 0.015f;
+		const float joint_pitch = lock_servos_upright ? 0.0f : math::constrain(_alpha_smoothed[i] + tau_lead * _d_alpha_filtered[i], -M_PI_2_F, M_PI_2_F);
+		const float joint_roll  = lock_servos_upright ? 0.0f : math::constrain(_beta_smoothed[i]  + tau_lead * _d_beta_filtered[i],  -M_PI_2_F, M_PI_2_F);
 
 		// Servos are mapped to channels 201..208:
 		const int s_pitch_idx = _first_servo_idx + 2 * i;
@@ -274,9 +309,8 @@ void ActuatorEffectivenessVirgo::updateSetpoint(const matrix::Vector<float, NUM_
 		// control_sp(2) is PX4 FRD Yaw torque (+ = Clockwise).
 		// Upper motor (m0: CCW) reaction torque is Clockwise (+).
 		// Lower motor (m1: CW) reaction torque is Counter-Clockwise (-).
-		// Coaxial differential reaction torque: 100% active during air descent!
-		// Only zeroed when truly resting on ground at idle to prevent friction twisting
-		const float yaw_rotor_diff = is_on_ground ? 0.0f : math::constrain(control_sp(2) * 0.15f, -0.20f, 0.20f);
+		// Coaxial differential reaction torque provides 100% of yaw control authority without moving servos!
+		const float yaw_rotor_diff = is_on_ground ? 0.0f : math::constrain(control_sp(2) * 0.25f, -0.25f, 0.25f);
 
 		const int m0_idx = 2 * i;     // Upper rotor (CCW)
 		const int m1_idx = 2 * i + 1; // Lower rotor (CW)

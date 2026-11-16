@@ -181,7 +181,7 @@ def plot_nmpc_telemetry(df, output_path):
     pos_err = np.sqrt((df['pos_x'] - df['sp_x'])**2 + (df['pos_y'] - df['sp_y'])**2)
     roll_err = np.abs(np.degrees(df['roll'] - df['sp_roll']))
     pitch_err = np.abs(np.degrees(df['pitch'] - df['sp_pitch']))
-    yaw_err = np.abs(np.degrees(df['yaw'] - df['sp_yaw']))
+    yaw_err = np.abs(np.degrees((df['yaw'] - df['sp_yaw'] + np.pi) % (2*np.pi) - np.pi))
 
     ax.plot(df['time'], pos_err, 'm-', label=f'XY Pos Error (Mean={pos_err.mean():.2f}m)')
     ax.plot(df['time'], roll_err, 'r:', label=f'Roll Error (Mean={roll_err.mean():.2f}°)')

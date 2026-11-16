@@ -29,33 +29,33 @@ param set-default MC_DES_ROLL_MIN -360.0
 param set-default FD_FAIL_R 0
 param set-default FD_FAIL_P 0
 
-# Position & Velocity Stiff Gains (Fuzzy Self-Tuning PID Nominal Baseline)
-param set-default MPC_XY_P 1.6
-param set-default MPC_XY_VEL_P_ACC 2.5
-param set-default MPC_XY_VEL_I_ACC 0.15
-param set-default MPC_XY_VEL_D_ACC 0.28
-param set-default MPC_XY_ERR_MAX 1.0
+# Position & Velocity Stiff Gains (Damped Heavy Airframe Tuning 4.56kg)
+param set-default MPC_XY_P 2.4
+param set-default MPC_XY_VEL_P_ACC 3.2
+param set-default MPC_XY_VEL_I_ACC 0.28
+param set-default MPC_XY_VEL_D_ACC 0.42
+param set-default MPC_XY_ERR_MAX 0.6
 param set-default MPC_ACC_HOR_MAX 1.5
 param set-default MPC_JERK_AUTO 3.0
-param set-default MPC_Z_P 1.5
-param set-default MPC_Z_VEL_P_ACC 4.0
-param set-default MPC_Z_VEL_D_ACC 0.05
+param set-default MPC_Z_P 2.0
+param set-default MPC_Z_VEL_P_ACC 4.8
+param set-default MPC_Z_VEL_D_ACC 0.10
 
-# Rate & Attitude Controller Gains (Tuned for 4.56 kg MorphQuad Inertia)
-param set-default MC_ROLL_P 4.2
-param set-default MC_PITCH_P 4.2
-param set-default MC_YAW_P 2.0
+# Rate & Attitude Controller Gains (High-Damping Tuning for 4.56 kg MorphQuad Inertia)
+param set-default MC_ROLL_P 4.6
+param set-default MC_PITCH_P 4.6
+param set-default MC_YAW_P 3.5
 param set-default MC_YAW_WEIGHT 1.0
-param set-default MC_ROLLRATE_P 0.080
-param set-default MC_PITCHRATE_P 0.090
-param set-default MC_ROLLRATE_I 0.08
-param set-default MC_PITCHRATE_I 0.09
-param set-default MC_ROLLRATE_D 0.0025
-param set-default MC_PITCHRATE_D 0.0030
-param set-default MC_YAWRATE_P 0.16
-param set-default MC_YAWRATE_I 0.02
-param set-default MC_YAWRATE_D 0.0015
-param set-default MC_YR_INT_LIM 0.15
+param set-default MC_ROLLRATE_P 0.095
+param set-default MC_PITCHRATE_P 0.095
+param set-default MC_ROLLRATE_I 0.10
+param set-default MC_PITCHRATE_I 0.10
+param set-default MC_ROLLRATE_D 0.0055
+param set-default MC_PITCHRATE_D 0.0060
+param set-default MC_YAWRATE_P 0.20
+param set-default MC_YAWRATE_I 0.05
+param set-default MC_YAWRATE_D 0.0035
+param set-default MC_YR_INT_LIM 0.20
 param set-default MC_YAWRATE_MAX 120.0
 param set-default MC_YAW_TQ_CUTOFF 20.0
 
