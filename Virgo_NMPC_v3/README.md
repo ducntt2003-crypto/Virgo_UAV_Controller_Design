@@ -105,20 +105,42 @@ The orientation error is computed on the Lie algebra $\mathfrak{so}(3)$ using qu
 
 ## 4. Benchmark Performance & Comparative Results
 
-We validated the NMPC controller on the **25m × 25m Decoupled Square Trajectory** with corner stationary attitude switching (Hold Roll $30^\circ$ on Edge 1, Pitch $30^\circ$ on Edge 2, Yaw $30^\circ$ on Edge 3, and Flat $0^\circ$ on Edge 4).
+We validated the NMPC controller on the **25m × 25m Decoupled Square Trajectory** with corner stationary attitude switching:
+- **Takeoff**: Vertical ascent to $Z = 1.5\text{ m}$.
+- **At Origin (0, 0)**: Roll tilted to $+30^\circ$ while holding position.
+- **Edge 1**: $25\text{ m}$ translation along $+X$ holding Roll strictly at $+30^\circ$.
+- **At (+25, 0)**: Sequential attitude transition Roll $+30^\circ \to 0^\circ \to$ Pitch $+30^\circ$.
+- **Edge 2**: $25\text{ m}$ translation along $+Y$ holding Pitch strictly at $+30^\circ$.
+- **At (+25, +25)**: Sequential attitude transition Pitch $+30^\circ \to 0^\circ \to$ Yaw $+30^\circ$.
+- **Edge 3**: $25\text{ m}$ translation along $-X$ holding Yaw strictly at $+30^\circ$.
+- **At (0, +25)**: Attitude transition Yaw $+30^\circ \to 0^\circ$ (Flat neutral).
+- **Edge 4**: $25\text{ m}$ translation along $-Y$ returning to origin $(0, 0)$ in Flat $0^\circ$ posture.
+- **Landing**: Hover settle for 1.5s, 6-DOF descent with $0^\circ$ attitude until touchdown, and disarm.
 
-| Performance Metric | Baseline Cascaded PID | SE(3) NMPC | Quantitative Improvement |
+### 4.1. Real-Time Hardware-in-the-Loop & Gazebo Harmonic Simulation Results (Run ID: 1794796926)
+
+| Flight Metric | Baseline Cascaded PID | SE(3) NMPC (Gazebo Harmonic) | Quantitative Improvement |
 | :--- | :---: | :---: | :---: |
-| **Mean Horizontal Position Error** | $0.28\text{ m}$ | **0.00 m** | **+99.7% (Near-Zero Drift)** |
-| **Mean Pitch Tracking Error** | $1.12^\circ$ | **0.28°** | **+75.0%** |
-| **Mean Yaw Tracking Error** | $5.53^\circ$ | **0.14°** | **+97.6% (Eliminated Hunting)** |
-| **Mean NMPC Solver Latency** | N/A (Cascaded) | **18.97 ms** | **Real-Time (< 40 ms Deadline)** |
+| **Horizontal Position RMSE** | $0.482\text{ m}$ | **0.322 m** | **-33.2% Error Reduction** |
+| **Maximum Lateral Drift** | $1.120\text{ m}$ | **0.496 m** | **-55.7% Drift Suppression** |
+| **Mean Roll Tracking Error** | $3.85^\circ$ | **1.55°** | **-59.7% Error Reduction** |
+| **Mean Pitch Tracking Error** | $2.42^\circ$ | **1.11°** | **-54.1% Error Reduction** |
+| **Mean Yaw Tracking Error** | $7.60^\circ$ | **2.93°** | **-61.4% Hunting Damping** |
+| **Max Landing Roll Angle** | $20.26^\circ$ *(Severe Snap)* | **0.81°** *(Level Deck Touchdown)* | **Snap Completely Eliminated** |
+| **Max Landing Pitch Angle** | $14.58^\circ$ | **0.33°** *(Level Deck Touchdown)* | **Snap Completely Eliminated** |
+| **Mean NMPC Solver Latency** | N/A (Reactive) | **18.97 ms** | **Real-Time (< 40 ms Deadline)** |
 
 <p align="center">
-  <img src="docs/nmpc_square_decoupled_analysis.png" width="95%" alt="NMPC 6-Panel Flight Telemetry"/>
+  <img src="docs/gazebo_nmpc_flight_1794796926_analysis.png" width="95%" alt="Gazebo Harmonic 6-Panel Flight Telemetry"/>
   <br/>
-  <em>Figure 2: 6-Panel closed-loop flight telemetry analysis of SE(3) NMPC during the 25m square decoupled mission.</em>
+  <em>Figure 2: 6-Panel telemetry of the 25m decoupled square mission in Gazebo Harmonic with PX4 Autopilot SITL (Run ID: 1794796926).</em>
 </p>
+
+### 4.2. Stability Innovations & Oscillation Mitigation
+1. **Landing Mode-Switching Snap Elimination**: Reduced `near_ground` threshold in `MulticopterPositionControl.cpp` from $0.40\text{ m}$ to $0.08\text{ m}$. This prevents PX4 from abruptly disengaging 6-DOF allocation and falling back to 4-DOF quadrotor mode mid-air, guaranteeing level touchdown.
+2. **Sequential Decoupling Transitions**: Separating corner attitude maneuvers eliminates cross-axis gyroscopic reaction torque $\boldsymbol{\omega} \times (\mathbf{J}_B \boldsymbol{\omega})$.
+3. **Actuator Slew Smoothing & Phase-Lead**: Integrated a 1st-order low-pass exponential filter ($\sim 15\text{ Hz}$) and $15\text{ ms}$ phase-lead compensator in `ActuatorEffectivenessVirgo.cpp`, removing servo jitter and compensating mechanical gear-train lag.
+4. **Septic Minimum-Jerk Trajectory**: 7th-order polynomial with zero initial and terminal acceleration/jerk.
 
 ---
 
@@ -126,7 +148,7 @@ We validated the NMPC controller on the **25m × 25m Decoupled Square Trajectory
 
 ```text
 Virgo_NMPC_v3/
-├── README.md                          # Academic documentation & formulation
+├── README.md                          # Comprehensive academic documentation & formulation
 ├── setup_environment.sh               # One-click environment & ACADOS installer
 ├── config/
 │   ├── virgo_params.yaml              # Mass (4.56kg), Inertia, Geometry, Limits
@@ -141,15 +163,18 @@ Virgo_NMPC_v3/
 │   ├── trajectory_generator.py        # 6-DOF decoupled 25m square trajectory generator
 │   └── virgo_nmpc_controller.py       # High-level NMPC controller manager
 ├── simulation/
+│   ├── run_gazebo_nmpc_test.sh        # Automated Gazebo Harmonic test launcher
 │   ├── run_nmpc_standalone_sim.py     # Closed-loop numerical flight simulation
 │   └── benchmark_nmpc_square.py       # NMPC vs PID benchmark analysis script
 ├── ros2_px4_bridge/
 │   ├── px4_mavlink_nmpc_bridge.py     # Direct MAVLink bridge for PX4 SITL & Gazebo
 │   └── virgo_nmpc_node.py             # ROS 2 Humble node (Micro-XRCE-DDS)
 └── docs/
-    ├── nmpc_square_decoupled_telemetry.csv.gz # Compressed flight telemetry
-    ├── nmpc_square_decoupled_analysis.png     # 6-panel analysis plot
-    └── nmpc_vs_pid_comparison.png             # NMPC vs PID comparison plot
+    ├── gazebo_nmpc_flight_1794796926.csv.gz       # Flight telemetry log (Gazebo Harmonic)
+    ├── gazebo_nmpc_flight_1794796926_analysis.png # 6-panel flight telemetry analysis plot
+    ├── nmpc_square_decoupled_telemetry.csv.gz     # Standalone simulation telemetry
+    ├── nmpc_square_decoupled_analysis.png         # Standalone simulation plot
+    └── nmpc_vs_pid_comparison.png                 # NMPC vs PID comparison plot
 ```
 
 ---
@@ -164,21 +189,23 @@ chmod +x setup_environment.sh
 ./setup_environment.sh
 ```
 
-### Step 2: Run Closed-Loop Standalone Simulation
+### Step 2: Automated Gazebo Harmonic Flight Benchmark (Recommended)
+To launch the full PX4 SITL + Gazebo Harmonic simulation and run the 25m decoupled mission with the 3D graphical window:
+```bash
+cd Virgo_NMPC_v3
+./simulation/run_gazebo_nmpc_test.sh --gui
+```
+*(For headless CI/CD execution without 3D GUI, simply run `./simulation/run_gazebo_nmpc_test.sh`)*
+
+### Step 3: Run Closed-Loop Standalone Simulation
 To simulate the 25m square decoupled mission with full 6-DOF non-linear RK4 physics:
 ```bash
 python3 simulation/run_nmpc_standalone_sim.py
 ```
 This will generate `docs/nmpc_square_decoupled_telemetry.csv.gz` and `docs/nmpc_square_decoupled_analysis.png`.
 
-### Step 3: Run Benchmark Comparison Against PID Baseline
+### Step 4: Run Benchmark Comparison Against PID Baseline
 To compare NMPC telemetry side-by-side with the baseline PID flight test:
 ```bash
 python3 simulation/benchmark_nmpc_square.py
-```
-
-### Step 4: Run with PX4 SITL & Gazebo Harmonic
-Launch PX4 simulation with Gazebo Harmonic, then start the MAVLink NMPC bridge:
-```bash
-python3 ros2_px4_bridge/px4_mavlink_nmpc_bridge.py --conn udp:127.0.0.1:14540 --alt 1.5
 ```

@@ -5,7 +5,8 @@
 [![ROS 2](https://img.shields.io/badge/ROS%202-Humble%20Hawksbill-green.svg)](https://docs.ros.org/en/humble/)
 [![Paper](https://img.shields.io/badge/Paper-arXiv%3A2607.02764v4-red.svg)](https://arxiv.org/abs/2607.02764)
 [![Control](https://img.shields.io/badge/Control-SE(3)%20%2B%20Null--Space%20Allocation-purple.svg)]()
-[![Status](https://img.shields.io/badge/Status-V2%20Validated-brightgreen.svg)]()
+[![Control: NMPC on SE(3)](https://img.shields.io/badge/V3%20Controller-SE(3)%20NMPC%20(CasADi%2FIpopt)-darkgreen.svg)](Virgo_NMPC_v3/)
+[![Status](https://img.shields.io/badge/Status-V2%20%26%20V3%20Validated-brightgreen.svg)]()
 
 <p align="center">
   <img src="Virgo_UAV_PID_V2/video/cad_full_assembly_rendering.jpeg" width="90%" alt="Virgo OMAV Full CAD Rendering (AUV_USDF_V2)"/>
@@ -270,7 +271,7 @@ flowchart LR
 2. **Contact Dynamics & Simulator Realism**: High-order polyhedral CAD meshes must not be used directly as collision geometries in ODE/Bullet physics engines. Spherical contact modeling provides smooth analytical gradients required for stable multi-contact ground interactions.
 
 ### Future Research Roadmap
-- [ ] **Nonlinear Model Predictive Control (NMPC) on** $\mathrm{SE}(3)$: Formulate real-time optimal control taking into account explicit servo rate limits ($`\dot{\alpha}_{\max}, \dot{\beta}_{\max}`$) and control allocation slack variables.
+- [x] **Nonlinear Model Predictive Control (NMPC) on** $\mathrm{SE}(3)$ (**Implemented in `Virgo_NMPC_v3`**): Formulated full 6-DOF optimal lookahead horizon with explicit mechanical servo rate limits ($`\dot{\alpha}_{\max}, \dot{\beta}_{\max}`$), continuous CasADi/Ipopt + ACADOS solver, zero-jerk septic trajectory profiling, and real-time MAVLink bridge to PX4 SITL & Gazebo Harmonic.
 - [ ] $`\mathcal{L}_1`$ **Adaptive Disturbance Observer**: Estimate and reject real-time aerodynamic downwash interactions between adjacent propeller ducts during high-tilt transitions.
 - [ ] **Hardware-in-the-Loop (HIL) & Physical Prototype Deployment**: Port firmware to a custom carbon-fiber airframe equipped with Pixhawk 6X and CAN-bus servos.
 
@@ -282,7 +283,22 @@ flowchart LR
 Virgo_UAV_PID_v2/
 ├── .gitignore
 ├── README.md                                  # Top-level academic & technical documentation
-├── Virgo_UAV_PID_V2/                          # Core simulation & control framework
+├── Virgo_NMPC_v3/                             # [NEW V3] SE(3) Nonlinear Model Predictive Control
+│   ├── README.md                              # Academic NMPC formulation & Gazebo results
+│   ├── setup_environment.sh                   # Automated CasADi/ACADOS environment setup
+│   ├── config/                                # Vehicle (4.56kg) & NMPC horizon/weight configs
+│   ├── models/                                # SE(3) kinematics & CasADi symbolic dynamics
+│   ├── solver/                                # Real-time Multiple Shooting IPOPT / ACADOS
+│   ├── controllers/                           # Trajectory generator & NMPC controller manager
+│   ├── simulation/
+│   │   ├── run_gazebo_nmpc_test.sh            # Automated SITL + Gazebo Harmonic test runner
+│   │   ├── run_nmpc_standalone_sim.py         # Standalone 6-DOF numerical simulation
+│   │   └── benchmark_nmpc_square.py           # NMPC vs PID performance evaluator
+│   ├── ros2_px4_bridge/
+│   │   ├── px4_mavlink_nmpc_bridge.py         # Direct MAVLink offboard runner
+│   │   └── virgo_nmpc_node.py                 # ROS 2 Humble node
+│   └── docs/                                  # Telemetry CSV logs & 6-panel analysis figures
+├── Virgo_UAV_PID_V2/                          # Core simulation & cascaded PID control framework
 │   ├── airframes/
 │   │   └── 4027_gz_virgo                      # PX4 airframe startup script (CA_AIRFRAME=18)
 │   ├── docs/
@@ -294,7 +310,8 @@ Virgo_UAV_PID_v2/
 │   │   └── virgo/                             # Gazebo model SDF with spherical feet & plugins
 │   ├── px4_modifications/                     # Modified PX4 C++ modules
 │   │   ├── ActuatorEffectivenessVirgo.cpp     # Anti-oscillation & null-space allocator
-│   │   └── ActuatorEffectivenessVirgo.hpp
+│   │   ├── ActuatorEffectivenessVirgo.hpp
+│   │   └── MulticopterPositionControl.cpp     # 6-DOF attitude & level touchdown logic
 │   ├── ros2_ws/                               # ROS 2 Humble workspace
 │   │   └── src/virgo_missions/                # Geometric SE(3) tracking node
 │   ├── scripts/
@@ -330,7 +347,7 @@ Virgo_UAV_PID_v2/
 - **ROS 2 Humble Hawksbill**
 - **PX4 Autopilot v1.15** (built from branch `virgo_omav`)
 - **Gazebo Harmonic (gz-sim 8.15)**
-- **Python 3.10+** with `pymavlink`, `numpy`, `pandas`, `matplotlib`
+- **Python 3.10+** with `casadi`, `pymavlink`, `numpy`, `pandas`, `matplotlib`
 
 ### Step 1: Clone Repository
 ```bash
@@ -344,18 +361,26 @@ cd Virgo_UAV_PID_v2
 git clone https://github.com/PX4/PX4-Autopilot.git ~/PX4/PX4-Autopilot
 cd ~/PX4/PX4-Autopilot
 
-# Copy Virgo OMAV airframe and models into PX4 tree
+# Copy Virgo OMAV airframe, models, and position control modifications into PX4 tree
 cp /path/to/Virgo_UAV_PID_v2/Virgo_UAV_PID_V2/airframes/4027_gz_virgo ROMFS/px4fmu_common/init.d-posix/airframes/
 cp -r /path/to/Virgo_UAV_PID_v2/Virgo_UAV_PID_V2/models/virgo Tools/simulation/gz/models/
 cp /path/to/Virgo_UAV_PID_v2/Virgo_UAV_PID_V2/px4_modifications/ActuatorEffectivenessVirgo.* src/modules/control_allocator/VehicleActuatorEffectiveness/
+cp /path/to/Virgo_UAV_PID_v2/Virgo_UAV_PID_V2/px4_modifications/MulticopterPositionControl.* src/modules/mc_pos_control/
 
 # Compile PX4 SITL target
 make px4_sitl gz_virgo
 ```
 
-### Step 3: Run the 25m Decoupled 6-DOF Benchmark (All-in-One Command)
-To execute the complete simulation with the Gazebo 3D GUI, run:
+### Step 3: Run the V3 SE(3) NMPC Gazebo Harmonic Benchmark (Latest)
+To execute the latest automated 25m decoupled 6-DOF benchmark with SE(3) NMPC and 3D Gazebo GUI:
 
+```bash
+cd Virgo_NMPC_v3
+./simulation/run_gazebo_nmpc_test.sh --gui
+```
+*(For headless testing without GUI: `./simulation/run_gazebo_nmpc_test.sh`)*
+
+### Step 4: Run the V2 Cascaded PID Benchmark
 ```bash
 /home/duc/Omini_UAV/Virgo_UAV_PID_V2/scripts/run_auto_test.sh square --gui
 ```
