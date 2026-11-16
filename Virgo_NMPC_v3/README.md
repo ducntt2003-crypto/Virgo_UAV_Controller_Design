@@ -20,9 +20,9 @@ While standard cascaded PID controllers with static pseudo-inverse allocation ca
 **Virgo_NMPC_v3** resolves these challenges by formulating a full-state **Nonlinear Model Predictive Controller (NMPC) on Lie group** $\mathrm{SE}(3)$, explicitly optimizing over a look-ahead prediction horizon with servo rate constraints.
 
 <p align="center">
-  <img src="docs/nmpc_vs_pid_comparison.png" width="92%" alt="NMPC vs PID Benchmark Comparison"/>
+  <img src="docs/nmpc_vs_pid_comparison.png" width="95%" alt="NMPC vs PID Benchmark Comparison in Gazebo Harmonic"/>
   <br/>
-  <em>Figure 1: Telemetry comparison between SE(3) NMPC and Baseline Cascaded PID on the 25m Decoupled Square Trajectory.</em>
+  <em>Figure 1: Comprehensive flight benchmark comparison in Gazebo Harmonic physics between SE(3) NMPC and Baseline Cascaded PID on the 25m Decoupled Square Trajectory (4.56 kg Virgo OMAV platform). (a) 2D trajectory tracking with corner attitude transitions; (b) Horizontal position tracking error vs. time; (c) Decoupled 6-DOF attitude tracking (Roll +30°, Pitch +30°, Yaw +30°, Flat 0°); (d) Quantitative metric improvements showing -39.4% mean position error reduction and -35.9% peak drift reduction.</em>
 </p>
 
 ---
