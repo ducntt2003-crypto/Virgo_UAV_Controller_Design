@@ -20,7 +20,7 @@ While standard cascaded PID controllers with static pseudo-inverse allocation ca
 **Virgo_NMPC_v3** resolves these challenges by formulating a full-state **Nonlinear Model Predictive Controller (NMPC) on Lie group** $\mathrm{SE}(3)$, explicitly optimizing over a look-ahead prediction horizon with servo rate constraints.
 
 <p align="center">
-  <img src="docs/nmpc_vs_pid_comparison.png" width="95%" alt="NMPC vs PID Benchmark Comparison in Gazebo Harmonic"/>
+  <img src="docs/gazebo_nmpc_vs_pid_comparison_benchmark.png" width="95%" alt="NMPC vs PID Benchmark Comparison in Gazebo Harmonic"/>
   <br/>
   <em>Figure 1: Comprehensive flight benchmark comparison in Gazebo Harmonic physics between SE(3) NMPC and Baseline Cascaded PID on the 25m Decoupled Square Trajectory (4.56 kg Virgo OMAV platform). (a) 2D trajectory tracking with corner attitude transitions; (b) Horizontal position tracking error vs. time; (c) Decoupled 6-DOF attitude tracking (Roll +30°, Pitch +30°, Yaw +30°, Flat 0°); (d) Quantitative metric improvements showing -39.4% mean position error reduction and -35.9% peak drift reduction.</em>
 </p>
@@ -172,9 +172,9 @@ Virgo_NMPC_v3/
 └── docs/
     ├── gazebo_nmpc_flight_1794796926.csv.gz       # Flight telemetry log (Gazebo Harmonic)
     ├── gazebo_nmpc_flight_1794796926_analysis.png # 6-panel flight telemetry analysis plot
+    ├── gazebo_nmpc_vs_pid_comparison_benchmark.png # NMPC vs PID full Gazebo benchmark comparison
     ├── nmpc_square_decoupled_telemetry.csv.gz     # Standalone simulation telemetry
-    ├── nmpc_square_decoupled_analysis.png         # Standalone simulation plot
-    └── nmpc_vs_pid_comparison.png                 # NMPC vs PID comparison plot
+    └── nmpc_square_decoupled_analysis.png         # Standalone simulation plot
 ```
 
 ---
