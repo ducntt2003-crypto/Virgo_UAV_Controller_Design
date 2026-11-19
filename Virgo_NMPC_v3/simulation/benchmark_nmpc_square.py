@@ -192,9 +192,11 @@ def run_benchmark_comparison():
     plt.tight_layout()
 
     out_fig = os.path.join(docs_dir, "nmpc_vs_pid_comparison.png")
+    out_fig_bench = os.path.join(docs_dir, "gazebo_nmpc_vs_pid_comparison_benchmark.png")
     plt.savefig(out_fig, dpi=250)
+    plt.savefig(out_fig_bench, dpi=250)
     plt.close()
-    print(f"[Benchmark] Comparison figure saved to: {out_fig}\n")
+    print(f"[Benchmark] Comparison figures saved to:\n  {out_fig}\n  {out_fig_bench}\n")
 
 
 if __name__ == "__main__":

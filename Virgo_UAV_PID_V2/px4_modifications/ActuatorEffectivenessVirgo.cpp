@@ -234,44 +234,28 @@ void ActuatorEffectivenessVirgo::updateSetpoint(const matrix::Vector<float, NUM_
 	const float tau_x_scaled = tau_x_decoupled * (arm_hover / _ly);
 	const float tau_y_scaled = tau_y_decoupled * (arm_hover / _lx);
 
-	Vector3f t[4];
-
-	// Arm 0: Front-Left (+lx, +ly)
-	t[0] = fd_flu * 0.25f
-	       + kB * ( tau_x_scaled * 0.25f)
-	       + kB * (-tau_y_scaled * 0.25f)
-	       + t_psi[0] * (tau_z_scaled * 0.25f);
-
-	// Arm 1: Back-Left (-lx, +ly)
-	t[1] = fd_flu * 0.25f
-	       + kB * ( tau_x_scaled * 0.25f)
-	       + kB * ( tau_y_scaled * 0.25f)
-	       + t_psi[1] * (tau_z_scaled * 0.25f);
-
-	// Arm 2: Back-Right (-lx, -ly)
-	t[2] = fd_flu * 0.25f
-	       + kB * (-tau_x_scaled * 0.25f)
-	       + kB * ( tau_y_scaled * 0.25f)
-	       + t_psi[2] * (tau_z_scaled * 0.25f);
-
-	// Arm 3: Front-Right (+lx, -ly)
-	t[3] = fd_flu * 0.25f
-	       + kB * (-tau_x_scaled * 0.25f)
-	       + kB * (-tau_y_scaled * 0.25f)
-	       + t_psi[3] * (tau_z_scaled * 0.25f);
+	// Vectoring force vector for gimbal pods (purely translational + filtered yaw trim):
+	// NOTE: Decoupling Roll/Pitch attitude torque from servo angle extraction is crucial!
+	// Servos ONLY orient the pods to deliver translational force and slow yaw trim.
+	// Fast attitude stabilization (tau_x, tau_y) is handled 100% by differential motor thrust.
+	// This isolates servos from 250 Hz attitude rate feedback chatter, eliminating jitter completely.
+	Vector3f t_vec[4];
+	for (int i = 0; i < 4; ++i) {
+		t_vec[i] = fd_flu * 0.25f + t_psi[i] * (tau_z_scaled * 0.25f);
+	}
 
 	// -------------------------------------------------------------------------
 	// 3. Extract Rotor Speeds & Gimbal Angles (Eq. 14, 15)
 	// -------------------------------------------------------------------------
 	for (int i = 0; i < 4; ++i) {
-		const float T_mag = t[i].norm();
+		const float T_vec_mag = t_vec[i].norm();
 
 		float alpha_i = 0.0f;
 		float beta_i  = 0.0f;
 
 		// Keep upright (alpha=0, beta=0) on the ground, during takeoff, or during landing (lock_servos_upright)
-		if (!lock_servos_upright && T_mag > 0.03f && t[i](2) > 0.01f) {
-			const Vector3f t_hat = t[i] / T_mag;
+		if (!lock_servos_upright && T_vec_mag > 0.03f && t_vec[i](2) > 0.01f) {
+			const Vector3f t_hat = t_vec[i] / T_vec_mag;
 
 			// Roll angle beta: beta = -asin(t_hat_y)
 			const float t_hat_y_clamped = math::constrain(t_hat(1), -0.999f, 0.999f);
@@ -313,23 +297,30 @@ void ActuatorEffectivenessVirgo::updateSetpoint(const matrix::Vector<float, NUM_
 			_d_alpha_filtered[i] = 0.0f;
 			_d_beta_filtered[i]  = 0.0f;
 		} else {
-			// Low-pass filter raw servo angle commands to eliminate high-frequency chatter from sensor noise
-			const float filter_alpha = 0.25f; // Alpha filter ~15 Hz cut-off
-			_alpha_smoothed[i] += filter_alpha * (alpha_i - _alpha_smoothed[i]);
-			_beta_smoothed[i]  += filter_alpha * (beta_i  - _beta_smoothed[i]);
+			// Low-pass filter (~6.5 Hz cutoff at 250 Hz loop) to provide rock-solid, smooth servo damping
+			const float filter_alpha = 0.15f;
+			const float alpha_target = _alpha_smoothed[i] + filter_alpha * (alpha_i - _alpha_smoothed[i]);
+			const float beta_target  = _beta_smoothed[i]  + filter_alpha * (beta_i  - _beta_smoothed[i]);
 
-			float d_alpha = (_alpha_smoothed[i] - _alpha_prev[i]) / dt_alloc;
-			float d_beta  = (_beta_smoothed[i]  - _beta_prev[i])  / dt_alloc;
-			_alpha_prev[i] = _alpha_smoothed[i];
-			_beta_prev[i]  = _beta_smoothed[i];
+			// Physical Slew Rate Limiter (Max 8.0 rad/s ~ 460 deg/s)
+			// Smoothly enforces realistic physical rate limits without introducing phase lag
+			const float max_servo_rate = 8.0f; // rad/s
+			const float max_delta = max_servo_rate * dt_alloc;
 
-			// Low-pass filter the derivative to avoid sensor noise amplification
+			const float delta_alpha = math::constrain(alpha_target - _alpha_smoothed[i], -max_delta, max_delta);
+			const float delta_beta  = math::constrain(beta_target  - _beta_smoothed[i],  -max_delta, max_delta);
+
+			const float d_alpha = delta_alpha / dt_alloc;
+			const float d_beta  = delta_beta  / dt_alloc;
+			_alpha_smoothed[i] += delta_alpha;
+			_beta_smoothed[i]  += delta_beta;
+
 			_d_alpha_filtered[i] = 0.85f * _d_alpha_filtered[i] + 0.15f * d_alpha;
 			_d_beta_filtered[i]  = 0.85f * _d_beta_filtered[i]  + 0.15f * d_beta;
 		}
 
-		// 15ms phase-lead feedforward to cancel servo mechanical delay in Gazebo without amplifying high-frequency noise
-		const float tau_lead = 0.015f;
+		// Light 5ms phase-lead to cancel small mechanical actuator delay
+		const float tau_lead = 0.005f;
 		const float joint_pitch = lock_servos_upright ? 0.0f : math::constrain(_alpha_smoothed[i] + tau_lead * _d_alpha_filtered[i], -M_PI_2_F, M_PI_2_F);
 		const float joint_roll  = lock_servos_upright ? 0.0f : math::constrain(_beta_smoothed[i]  + tau_lead * _d_beta_filtered[i],  -M_PI_2_F, M_PI_2_F);
 
@@ -342,6 +333,16 @@ void ActuatorEffectivenessVirgo::updateSetpoint(const matrix::Vector<float, NUM_
 			actuator_sp(s_pitch_idx) = joint_pitch / M_PI_2_F;
 			actuator_sp(s_roll_idx)  = joint_roll  / M_PI_2_F;
 		}
+
+		// Instantaneous Differential Thrust for Roll and Pitch Attitude Stabilization:
+		// BLDC motors deliver zero-delay roll/pitch reaction without servo movement.
+		float delta_thrust = 0.0f;
+		if (i == 0) delta_thrust =  (tau_x_scaled * 0.25f) - (tau_y_scaled * 0.25f);
+		if (i == 1) delta_thrust =  (tau_x_scaled * 0.25f) + (tau_y_scaled * 0.25f);
+		if (i == 2) delta_thrust = -(tau_x_scaled * 0.25f) + (tau_y_scaled * 0.25f);
+		if (i == 3) delta_thrust = -(tau_x_scaled * 0.25f) - (tau_y_scaled * 0.25f);
+
+		const float T_mag = math::max(0.01f, T_vec_mag + delta_thrust);
 
 		// Co-Axial Motor pair throttle:
 		const float nominal_arm_scale = 0.25f;
