@@ -56,6 +56,8 @@ class VirgoCasadiModel:
         self.angle_min = float(self.cfg["servos"]["angle_min"])
         self.angle_max = float(self.cfg["servos"]["angle_max"])
         self.rate_limit = float(self.cfg["servos"]["rate_limit"])
+        self.rate_limit_alpha = float(self.cfg["servos"].get("rate_limit_alpha", 10.0))
+        self.rate_limit_beta = float(self.cfg["servos"].get("rate_limit_beta", 6.4))
 
         # State dimensions
         # x = [p(3), v(3), q(4), omega(3), alpha(4), beta(4)] -> n_x = 21

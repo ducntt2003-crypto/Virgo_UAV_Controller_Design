@@ -297,18 +297,25 @@ void ActuatorEffectivenessVirgo::updateSetpoint(const matrix::Vector<float, NUM_
 			_d_alpha_filtered[i] = 0.0f;
 			_d_beta_filtered[i]  = 0.0f;
 		} else {
-			// Low-pass filter (~6.5 Hz cutoff at 250 Hz loop) to provide rock-solid, smooth servo damping
-			const float filter_alpha = 0.15f;
+			// Low-pass filters aligned with MorphQuad DYNAMIXEL actuators (arXiv:2607.02764):
+			// Outer axis (XC330-M288-T via belt-pulley, rise time 119 ms): cutoff ~8.0 Hz (filter_alpha = 0.18f)
+			// Inner axis (XL330-M288-T inline, rise time 182 ms): cutoff ~5.2 Hz (filter_beta = 0.12f)
+			const float filter_alpha = 0.18f;
+			const float filter_beta  = 0.12f;
 			const float alpha_target = _alpha_smoothed[i] + filter_alpha * (alpha_i - _alpha_smoothed[i]);
-			const float beta_target  = _beta_smoothed[i]  + filter_alpha * (beta_i  - _beta_smoothed[i]);
+			const float beta_target  = _beta_smoothed[i]  + filter_beta  * (beta_i  - _beta_smoothed[i]);
 
-			// Physical Slew Rate Limiter (Max 8.0 rad/s ~ 460 deg/s)
-			// Smoothly enforces realistic physical rate limits without introducing phase lag
-			const float max_servo_rate = 8.0f; // rad/s
-			const float max_delta = max_servo_rate * dt_alloc;
+			// Physical Slew Rate Limiters matching DYNAMIXEL hardware:
+			// Outer axis (XC330 at 11.1V): 100 RPM ~ 10.5 rad/s (600 deg/s)
+			// Inner axis (XL330 at 5.0V): 61 RPM ~ 6.4 rad/s (366 deg/s)
+			const float max_servo_rate_alpha = 10.0f; // rad/s
+			const float max_servo_rate_beta  = 6.4f;  // rad/s
 
-			const float delta_alpha = math::constrain(alpha_target - _alpha_smoothed[i], -max_delta, max_delta);
-			const float delta_beta  = math::constrain(beta_target  - _beta_smoothed[i],  -max_delta, max_delta);
+			const float max_delta_alpha = max_servo_rate_alpha * dt_alloc;
+			const float max_delta_beta  = max_servo_rate_beta  * dt_alloc;
+
+			const float delta_alpha = math::constrain(alpha_target - _alpha_smoothed[i], -max_delta_alpha, max_delta_alpha);
+			const float delta_beta  = math::constrain(beta_target  - _beta_smoothed[i],  -max_delta_beta,  max_delta_beta);
 
 			const float d_alpha = delta_alpha / dt_alloc;
 			const float d_beta  = delta_beta  / dt_alloc;
@@ -319,10 +326,12 @@ void ActuatorEffectivenessVirgo::updateSetpoint(const matrix::Vector<float, NUM_
 			_d_beta_filtered[i]  = 0.85f * _d_beta_filtered[i]  + 0.15f * d_beta;
 		}
 
-		// Light 5ms phase-lead to cancel small mechanical actuator delay
-		const float tau_lead = 0.005f;
-		const float joint_pitch = lock_servos_upright ? 0.0f : math::constrain(_alpha_smoothed[i] + tau_lead * _d_alpha_filtered[i], -M_PI_2_F, M_PI_2_F);
-		const float joint_roll  = lock_servos_upright ? 0.0f : math::constrain(_beta_smoothed[i]  + tau_lead * _d_beta_filtered[i],  -M_PI_2_F, M_PI_2_F);
+		// Phase-lead compensation tuned to cancel mechanical actuator lag:
+		// 5 ms for outer axis (XC330), 8 ms for inner axis (XL330)
+		const float tau_lead_alpha = 0.005f;
+		const float tau_lead_beta  = 0.008f;
+		const float joint_pitch = lock_servos_upright ? 0.0f : math::constrain(_alpha_smoothed[i] + tau_lead_alpha * _d_alpha_filtered[i], -M_PI_2_F, M_PI_2_F);
+		const float joint_roll  = lock_servos_upright ? 0.0f : math::constrain(_beta_smoothed[i]  + tau_lead_beta  * _d_beta_filtered[i],  -M_PI_2_F, M_PI_2_F);
 
 		// Servos are mapped to channels 201..208:
 		const int s_pitch_idx = _first_servo_idx + 2 * i;

@@ -128,9 +128,11 @@ class CasadiNMPCSolver:
             # 4. Control Bounds
             # Pod thrust: 0.5 <= T <= 18.5 N
             self.opti.subject_to(self.opti.bounded(self.model.thrust_min, uk[0:4], self.model.thrust_max))
-            # Slew rate: -10 <= dot_alpha, dot_beta <= +10 rad/s
-            self.opti.subject_to(self.opti.bounded(-self.model.rate_limit, uk[4:8], self.model.rate_limit))
-            self.opti.subject_to(self.opti.bounded(-self.model.rate_limit, uk[8:12], self.model.rate_limit))
+            # Slew rate: -10 <= dot_alpha <= +10 rad/s (XC330), -6.4 <= dot_beta <= +6.4 rad/s (XL330)
+            rate_lim_a = getattr(self.model, 'rate_limit_alpha', self.model.rate_limit)
+            rate_lim_b = getattr(self.model, 'rate_limit_beta', self.model.rate_limit)
+            self.opti.subject_to(self.opti.bounded(-rate_lim_a, uk[4:8], rate_lim_a))
+            self.opti.subject_to(self.opti.bounded(-rate_lim_b, uk[8:12], rate_lim_b))
             # Coaxial yaw torque: -0.5 <= tau_yaw <= 0.5 N*m
             self.opti.subject_to(self.opti.bounded(-0.5, uk[12], 0.5))
 

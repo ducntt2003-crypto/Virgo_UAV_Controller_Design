@@ -37,5 +37,8 @@ servos:
   num_servos: 8                    # 4 outer pitch (alpha) + 4 inner roll (beta)
   angle_min: -1.570796             # -pi/2 rad (-90 deg)
   angle_max:  1.570796             # +pi/2 rad (+90 deg)
-  rate_limit: 10.0                 # Max slew rate (rad/s) (~573 deg/s)
-  time_constant: 0.08              # 1st-order equivalent actuator lag (s)
+  rate_limit: 10.0                 # Legacy global max slew rate (rad/s)
+  rate_limit_alpha: 10.0           # Outer axis (XC330 @ 11.1V + belt drive): 100 RPM ~ 10.5 rad/s
+  rate_limit_beta: 6.4             # Inner axis (XL330 @ 5.0V inline): 61 RPM ~ 6.4 rad/s
+  time_constant_alpha: 0.05        # Outer rise time ~119ms -> tau ~ 0.05s
+  time_constant_beta: 0.08         # Inner rise time ~182ms -> tau ~ 0.08s

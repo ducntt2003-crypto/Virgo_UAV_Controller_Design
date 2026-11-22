@@ -112,8 +112,8 @@
       <axis>
         <xyz>0 0 1</xyz>
         <limit>
-          <effort>25</effort>
-          <velocity>20</velocity>
+          <effort>3.0</effort>
+          <velocity>10.5</velocity>
           <lower>-1.5707963</lower>
           <upper>1.5707963</upper>
         </limit>
@@ -161,8 +161,8 @@
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
-          <effort>25</effort>
-          <velocity>20</velocity>
+          <effort>1.0</effort>
+          <velocity>6.5</velocity>
           <lower>-1.5707963</lower>
           <upper>1.5707963</upper>
         </limit>
@@ -301,8 +301,8 @@
       <axis>
         <xyz>0 0 1</xyz>
         <limit>
-          <effort>25</effort>
-          <velocity>20</velocity>
+          <effort>3.0</effort>
+          <velocity>10.5</velocity>
           <lower>-1.5707963</lower>
           <upper>1.5707963</upper>
         </limit>
@@ -350,8 +350,8 @@
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
-          <effort>25</effort>
-          <velocity>20</velocity>
+          <effort>1.0</effort>
+          <velocity>6.5</velocity>
           <lower>-1.5707963</lower>
           <upper>1.5707963</upper>
         </limit>
@@ -490,8 +490,8 @@
       <axis>
         <xyz>0 0 1</xyz>
         <limit>
-          <effort>25</effort>
-          <velocity>20</velocity>
+          <effort>3.0</effort>
+          <velocity>10.5</velocity>
           <lower>-1.5707963</lower>
           <upper>1.5707963</upper>
         </limit>
@@ -539,8 +539,8 @@
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
-          <effort>25</effort>
-          <velocity>20</velocity>
+          <effort>1.0</effort>
+          <velocity>6.5</velocity>
           <lower>-1.5707963</lower>
           <upper>1.5707963</upper>
         </limit>
@@ -679,8 +679,8 @@
       <axis>
         <xyz>0 0 1</xyz>
         <limit>
-          <effort>25</effort>
-          <velocity>20</velocity>
+          <effort>3.0</effort>
+          <velocity>10.5</velocity>
           <lower>-1.5707963</lower>
           <upper>1.5707963</upper>
         </limit>
@@ -728,8 +728,8 @@
       <axis>
         <xyz>1 0 0</xyz>
         <limit>
-          <effort>25</effort>
-          <velocity>20</velocity>
+          <effort>1.0</effort>
+          <velocity>6.5</velocity>
           <lower>-1.5707963</lower>
           <upper>1.5707963</upper>
         </limit>
@@ -937,28 +937,28 @@
 
     <!-- ==================== 8 GIMBAL SERVO CONTROLLERS ==================== -->
     <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
-      <joint_name>ARM_MOTOR_3_joint</joint_name><sub_topic>servo_0</sub_topic><p_gain>40.0</p_gain><d_gain>1.0</d_gain><i_gain>0.0</i_gain><cmd_max>12.0</cmd_max><cmd_min>-12.0</cmd_min>
+      <joint_name>ARM_MOTOR_3_joint</joint_name><sub_topic>servo_0</sub_topic><p_gain>40.0</p_gain><d_gain>1.0</d_gain><i_gain>0.0</i_gain><cmd_max>2.5</cmd_max><cmd_min>-2.5</cmd_min>
     </plugin>
     <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
-      <joint_name>SHAFT_MOTOR_3_joint</joint_name><sub_topic>servo_1</sub_topic><p_gain>25.0</p_gain><d_gain>0.5</d_gain><i_gain>0.0</i_gain><cmd_max>6.0</cmd_max><cmd_min>-6.0</cmd_min>
+      <joint_name>SHAFT_MOTOR_3_joint</joint_name><sub_topic>servo_1</sub_topic><p_gain>25.0</p_gain><d_gain>0.5</d_gain><i_gain>0.0</i_gain><cmd_max>0.8</cmd_max><cmd_min>-0.8</cmd_min>
     </plugin>
     <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
-      <joint_name>ARM_MOTOR_2_joint</joint_name><sub_topic>servo_2</sub_topic><p_gain>40.0</p_gain><d_gain>1.0</d_gain><i_gain>0.0</i_gain><cmd_max>12.0</cmd_max><cmd_min>-12.0</cmd_min>
+      <joint_name>ARM_MOTOR_2_joint</joint_name><sub_topic>servo_2</sub_topic><p_gain>40.0</p_gain><d_gain>1.0</d_gain><i_gain>0.0</i_gain><cmd_max>2.5</cmd_max><cmd_min>-2.5</cmd_min>
     </plugin>
     <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
-      <joint_name>SHAFT_MOTOR_2_joint</joint_name><sub_topic>servo_3</sub_topic><p_gain>25.0</p_gain><d_gain>0.5</d_gain><i_gain>0.0</i_gain><cmd_max>6.0</cmd_max><cmd_min>-6.0</cmd_min>
+      <joint_name>SHAFT_MOTOR_2_joint</joint_name><sub_topic>servo_3</sub_topic><p_gain>25.0</p_gain><d_gain>0.5</d_gain><i_gain>0.0</i_gain><cmd_max>0.8</cmd_max><cmd_min>-0.8</cmd_min>
     </plugin>
     <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
-      <joint_name>ARM_MOTOR_4_joint</joint_name><sub_topic>servo_4</sub_topic><p_gain>40.0</p_gain><d_gain>1.0</d_gain><i_gain>0.0</i_gain><cmd_max>12.0</cmd_max><cmd_min>-12.0</cmd_min>
+      <joint_name>ARM_MOTOR_4_joint</joint_name><sub_topic>servo_4</sub_topic><p_gain>40.0</p_gain><d_gain>1.0</d_gain><i_gain>0.0</i_gain><cmd_max>2.5</cmd_max><cmd_min>-2.5</cmd_min>
     </plugin>
     <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
-      <joint_name>SHAFT_MOTOR_4_joint</joint_name><sub_topic>servo_5</sub_topic><p_gain>25.0</p_gain><d_gain>0.5</d_gain><i_gain>0.0</i_gain><cmd_max>6.0</cmd_max><cmd_min>-6.0</cmd_min>
+      <joint_name>SHAFT_MOTOR_4_joint</joint_name><sub_topic>servo_5</sub_topic><p_gain>25.0</p_gain><d_gain>0.5</d_gain><i_gain>0.0</i_gain><cmd_max>0.8</cmd_max><cmd_min>-0.8</cmd_min>
     </plugin>
     <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
-      <joint_name>ARM_MOTOR_1_joint</joint_name><sub_topic>servo_6</sub_topic><p_gain>40.0</p_gain><d_gain>1.0</d_gain><i_gain>0.0</i_gain><cmd_max>12.0</cmd_max><cmd_min>-12.0</cmd_min>
+      <joint_name>ARM_MOTOR_1_joint</joint_name><sub_topic>servo_6</sub_topic><p_gain>40.0</p_gain><d_gain>1.0</d_gain><i_gain>0.0</i_gain><cmd_max>2.5</cmd_max><cmd_min>-2.5</cmd_min>
     </plugin>
     <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
-      <joint_name>SHAFT_MOTOR_1_joint</joint_name><sub_topic>servo_7</sub_topic><p_gain>25.0</p_gain><d_gain>0.5</d_gain><i_gain>0.0</i_gain><cmd_max>6.0</cmd_max><cmd_min>-6.0</cmd_min>
+      <joint_name>SHAFT_MOTOR_1_joint</joint_name><sub_topic>servo_7</sub_topic><p_gain>25.0</p_gain><d_gain>0.5</d_gain><i_gain>0.0</i_gain><cmd_max>0.8</cmd_max><cmd_min>-0.8</cmd_min>
     </plugin>
 </model>
 </sdf>
