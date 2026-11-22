@@ -1,346 +1,265 @@
-# Virgo_UAV_PID_v2: Fully-Actuated 6-DOF Omnidirectional Morphing UAV Framework
+# Virgo_UAV_Controller_Design: Advanced 6-DOF Omnidirectional Morphing UAV Control Suite
 
 [![Platform](https://img.shields.io/badge/PX4-v1.15%20Autopilot-blue.svg)](https://px4.io/)
 [![Simulator](https://img.shields.io/badge/Gazebo-Harmonic%20(gz--sim%208.15)-orange.svg)](https://gazebosim.org/)
 [![ROS 2](https://img.shields.io/badge/ROS%202-Humble%20Hawksbill-green.svg)](https://docs.ros.org/en/humble/)
 [![Paper](https://img.shields.io/badge/Paper-arXiv%3A2607.02764v4-red.svg)](https://arxiv.org/abs/2607.02764)
-[![Control](https://img.shields.io/badge/Control-SE(3)%20%2B%20Null--Space%20Allocation-purple.svg)]()
-[![Control: NMPC on SE(3)](https://img.shields.io/badge/V3%20Controller-SE(3)%20NMPC%20(CasADi%2FIpopt)-darkgreen.svg)](Virgo_NMPC_v3/)
-[![Status](https://img.shields.io/badge/Status-V2%20%26%20V3%20Validated-brightgreen.svg)]()
+[![Control: NMPC on SE(3)](https://img.shields.io/badge/Advanced%20Controller-SE(3)%20NMPC%20(CasADi%2FIpopt)-darkgreen.svg)](Virgo_NMPC_v3/)
+[![Control: Cascaded PID](https://img.shields.io/badge/Baseline%20Controller-Cascaded%20SE(3)%20PID-purple.svg)](Virgo_UAV_PID_V2/)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Virgo__UAV__Controller__Design-181717.svg?logo=github)](https://github.com/ducntt2003-crypto/Virgo_UAV_Controller_Design)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 <p align="center">
-  <img src="Virgo_UAV_PID_V2/video/cad_full_assembly_rendering.jpeg" width="90%" alt="Virgo OMAV Full CAD Rendering (AUV_USDF_V2)"/>
+  <img src="Virgo_UAV_PID_V2/video/cad_full_assembly_rendering.jpeg" width="92%" alt="Virgo OMAV Full CAD Rendering (AUV_USDF_V2)"/>
 </p>
 
 ---
 
-## 1. Research Motivation & Academic Vision
+## 1. Executive Overview & Academic Vision
 
-### The Underactuation Dilemma of Multicopters
-Standard multirotor unmanned aerial vehicles (UAVs) are fundamentally **underactuated dynamical systems**: they possess only four independent control inputs (rotor thrusts) to govern six rigid-body degrees of freedom (3 translational positions $X, Y, Z$ and 3 rotational Euler angles $\phi, \theta, \psi$). To generate horizontal accelerations, a conventional quadrotor must tilt its entire airframe toward the desired direction of motion:
+The **Virgo OMAV** (Omnidirectional Multirotor Aerial Vehicle, physical platform `AUV_USDF_V2`, 4.56 kg) is an overactuated, fully decoupled 6-DOF morphing aerial system equipped with **4 coaxial tilting pods (8 BLDC motors and 8 gimbal servos)**. 
 
-$$
+Unlike conventional underactuated quadrotors whose lateral translation requires body tilt:
+
+```math
 \ddot{x} \propto -g \theta, \quad \ddot{y} \propto g \phi
-$$
+```
 
-This intrinsic coupling between translation and orientation severely impedes operations in complex real-world scenarios:
-- **Aerial Manipulation & Inspection**: Interacting physically with vertical or inclined structures (e.g., bridge piers, offshore wind turbine blades) requires the vehicle to maintain non-zero pitch or roll angles while hovering steadily in place without drifting.
-- **Narrow Space Traversal & Perching**: Flying through constrained windows or perching on arbitrary sloped surfaces requires independent body orientation.
-- **Gust Rejection & Sensor Pointing**: Onboard cameras, LiDAR, and scientific instruments must maintain steady lines-of-sight irrespective of turbulent wind compensation.
+Virgo OMAV achieves independent vectoring of translational forces and rotational torques across the entire spherical envelope $\mathbb{S}^2$. This enables critical operations impossible for standard multicopters:
+* **True 6-DOF Decoupled Flight**: Cruising horizontally with arbitrary constant body tilt ($+30^\circ$ roll, $+30^\circ$ pitch) without lateral drift.
+* **Continuous Multi-Revolution Maneuvers**: Full $360^\circ$ continuous roll/pitch aerobatics and pipe inspection.
+* **Aerial Manipulation**: Pushing, pressing, perching, and valve-turning with human-wrist force capacity.
+* **Omnidirectional Disturbance Rejection**: Active counteraction of turbulent lateral wind gusts without tilting camera payloads.
 
-### Academic Vision of Virgo_UAV_PID_v2
-**Virgo_UAV_PID_v2** is an open-source, publication-grade robotics framework implementing fully-actuated omnidirectional flight dynamics. It directly bridges:
-1. **High-Fidelity CAD & Physical Modeling**: SolidWorks-derived URDF/SDF package (**`AUV_USDF_V2`**) featuring accurate mass distributions, inertia tensors, and realistic actuator dynamics.
-2. **Advanced Theoretical Formulations**: Incorporating foundational principles from cutting-edge research, including **MorphQuad** (*University of Michigan, arXiv:2607.02764v4*) and **MorphEUS** (*arXiv:2505.18270v1*).
-3. **Robust Industrial Autopilot Integration**: Native firmware-level modifications to **PX4 Autopilot v1.15** control allocator, coupled with physics simulation in **Gazebo Harmonic (gz-sim 8.15)**.
+This repository (**`Virgo_UAV_Controller_Design`**) provides a comprehensive, publication-grade control engineering suite comparing two fundamental control paradigms:
+1. **[Virgo_UAV_PID_V2/](Virgo_UAV_PID_V2/)**: Classical Cascaded $\mathrm{SE}(3)$ Geometric PID with Energy-Optimal Closed-Form Control Allocation, contact dynamics optimization, and anti-oscillation tuning.
+2. **[Virgo_NMPC_v3/](Virgo_NMPC_v3/)**: Full-State Optimal $\mathrm{SE}(3)$ Nonlinear Model Predictive Control (NMPC) with calibrated DYNAMIXEL mechatronics, belt-pulley transmission modeling, and lookahead trajectory optimization.
 
 <p align="center">
-  <img src="Virgo_UAV_PID_V2/video/flight_simulation_demo.gif" width="90%" alt="Virgo OMAV 6-DOF Flight Simulation Demo"/>
+  <img src="Virgo_UAV_PID_V2/video/flight_simulation_demo.gif" width="92%" alt="Virgo OMAV 6-DOF Flight Simulation Demo"/>
   <br/>
-  <em>Figure 1: Full 3D Gazebo Harmonic flight simulation demonstrating independent 6-DOF decoupled maneuvers with 4 orange-highlighted tilting pods.</em>
+  <em>Figure 1: Full 3D Gazebo Harmonic flight simulation demonstrating independent 6-DOF decoupled flight with 4 tilting pods.</em>
 </p>
 
 ---
 
-## 2. Mechanical Architecture & CAD Specifications
+## 2. Head-to-Head Flight Benchmark: SE(3) NMPC vs Baseline PID
 
-The mechanical structure of the Virgo OMAV platform (modeled as `AUV_USDF_V2`) features an H-frame symmetric configuration with 4 tilting pods. Each pod houses a coaxial counter-rotating dual-rotor unit driven by 2 independent BLDC motors and is articulated by a 2-axis servo gimbal mechanism ($`\alpha_i`$ outer pitch tilt, $`\beta_i`$ inner roll tilt).
+Both controllers were benchmarked on the rigorous **25m × 25m Decoupled 6-DOF Square Trajectory** in Gazebo Harmonic with PX4 Autopilot SITL:
+* **Edge 1**: $25\text{ m}$ translation along $+X$ holding Roll strictly at $+30^\circ$.
+* **Edge 2**: $25\text{ m}$ translation along $+Y$ holding Pitch strictly at $+30^\circ$.
+* **Edge 3**: $25\text{ m}$ translation along $-X$ holding Yaw strictly at $+30^\circ$.
+* **Edge 4**: $25\text{ m}$ translation along $-Y$ returning to origin in Flat $0^\circ$ posture.
+* **Deck Touchdown**: Stationary hover settle, $0^\circ$ vertical descent until touchdown, and disarm.
 
-| Mechanical / Physical Parameter | Mathematical Symbol | Value | Unit | Description |
-| :--- | :---: | :---: | :---: | :--- |
-| **Total All-Up Takeoff Mass** | $m$ | **4.56** | $\text{kg}$ | Aligned with MorphQuad physical platform specifications |
-| **Longitudinal Half-Length** | $`L_x`$ | $0.19899$ | $\text{m}$ | Center of Mass to arm pitch axis |
-| **Lateral Half-Length** | $`L_y`$ | $0.19742$ | $\text{m}$ | Center of Mass to pod pivot roll axis |
-| **Radial Arm Radius** | $r$ | $0.28030$ | $\text{m}$ | $`r = \sqrt{L_x^2 + L_y^2}`$ |
-| **Moment of Inertia (X-axis)** | $`J_{xx}`$ | $0.0854$ | $\text{kg}\cdot\text{m}^2$ | CAD measured roll inertia tensor |
-| **Moment of Inertia (Y-axis)** | $`J_{yy}`$ | $0.0921$ | $\text{kg}\cdot\text{m}^2$ | CAD measured pitch inertia tensor |
-| **Moment of Inertia (Z-axis)** | $`J_{zz}`$ | $0.1458$ | $\text{kg}\cdot\text{m}^2$ | CAD measured yaw inertia tensor |
-| **Number of BLDC Motors** | $`N_m`$ | $8$ | - | 4 coaxial counter-rotating pairs ($`M_0 \dots M_7`$) |
-| **Number of Gimbal Servos** | $`N_s`$ | $8$ | - | 4 outer pitch servos ($`\alpha_i`$) + 4 inner roll servos ($`\beta_i`$) |
-| **Max Rotor Angular Velocity** | $`\Omega_{\max}`$ | $1200$ | $\text{rad/s}$ | Maximum rotor speed limit |
-| **Rotor Thrust Coefficient** | $`c_T`$ | $8.548 \times 10^{-6}$ | $\text{N}\cdot\text{s}^2/\text{rad}^2$ | Aerodynamic lift constant |
-| **Rotor Drag Coefficient** | $`c_Q`$ | $`0.06 \times c_T`$ | $\text{N}\cdot\text{m}\cdot\text{s}^2/\text{rad}^2$ | Propeller torque constant |
-| **Max Total Vertical Thrust** | $`T_{\max}`$ | $\approx 74.0$ | $\text{N}$ | Thrust-to-Weight Ratio $\approx 1.65$ |
-| **Servo Tilt Angle Limits** | $`\alpha_{\max}, \beta_{\max}`$ | $\pm 90^\circ$ ($\pm \pi/2$) | $\text{rad}$ | Full hemispherical vectoring range |
-| **Ground Landing Interface** | - | $4 \times$ Spheres | $\text{m}$ | Analytical $r=0.010\text{m}$ feet preventing contact chatter |
+<p align="center">
+  <img src="Virgo_NMPC_v3/docs/gazebo_nmpc_vs_pid_comparison_benchmark.png" width="95%" alt="NMPC vs PID Benchmark Comparison in Gazebo Harmonic"/>
+  <br/>
+  <em>Figure 2: Comprehensive flight benchmark comparison in Gazebo Harmonic physics between SE(3) NMPC and Baseline Cascaded PID on the 25m Decoupled Square Trajectory. (a) 2D trajectory tracking; (b) Horizontal position error vs time; (c) Attitude tracking; (d) Quantitative metric improvements.</em>
+</p>
+
+### 2.1. Quantitative Performance Metrics (Gazebo Harmonic SITL Verification Run 1795318332)
+
+| Performance Metric | Baseline Cascaded PID (V2) | SE(3) NMPC Suite (V3) | Quantitative Improvement |
+| :--- | :---: | :---: | :---: |
+| **Mean Horizontal Position Error** | $0.53\text{ m}$ | **0.12 m** | **+77.5% Outstanding Accuracy** |
+| **Position Error RMSE** | $0.59\text{ m}$ | **0.14 m** | **+75.8% Error Reduction** |
+| **Maximum Lateral Drift** | $1.05\text{ m}$ | **0.47 m** | **+55.7% Drift Suppression** |
+| **Mean Roll Tracking Error** | $1.99^\circ$ | **0.70°** | **+64.8% Sub-Degree Precision** |
+| **Mean Pitch Tracking Error** | $1.29^\circ$ | **0.31°** | **+75.7% Near-Zero Error** |
+| **Mean Yaw Tracking Error** | $4.13^\circ$ | **0.65°** | **+84.3% Hunting Elimination** |
+| **Mean Servo Slew Velocity** | $45.8^\circ/\text{s}$ | **23.2°/s** | **-49.3% Servo Jitter Reduction** |
+| **Landing Deck Touchdown Roll** | $20.26^\circ$ *(Severe Snap)* | **0.38°** *(Level Deck)* | **100% Elimination of Landing Snap** |
+| **Landing Deck Touchdown Pitch** | $14.58^\circ$ | **0.25°** *(Level Deck)* | **100% Elimination of Landing Snap** |
+| **Real-Time Solver Latency** | N/A (Reactive) | **18.97 ms** | **Real-Time (< 40 ms Deadline)** |
+
+<p align="center">
+  <img src="Virgo_NMPC_v3/docs/gazebo_nmpc_flight_1795318332_analysis.png" width="95%" alt="Gazebo Harmonic 6-Panel Flight Telemetry"/>
+  <br/>
+  <em>Figure 3: 6-Panel flight telemetry of the 25m decoupled square mission in Gazebo Harmonic with PX4 Autopilot SITL (Run ID: 1795318332).</em>
+</p>
 
 ---
 
-## 3. Mathematical Kinematics & Dynamics Formulation
+## 3. Mechanical Architecture & Actuator Mechatronics
+
+The physical parameters of Virgo OMAV (`AUV_USDF_V2`) are derived from high-precision SolidWorks CAD models and verified against the **MorphQuad** platform (*University of Michigan, arXiv:2607.02764v4*).
+
+### 3.1. Physical & Inertial Parameters
+| Mechanical / Physical Parameter | Symbol | Value | Unit | Description |
+| :--- | :---: | :---: | :---: | :--- |
+| **Total All-Up Takeoff Mass** | $m$ | **4.56** | $\text{kg}$ | Takeoff mass including avionics & 6S LiPo |
+| **Longitudinal Half-Length** | $L_x$ | $0.19899$ | $\text{m}$ | Center of Mass to arm pitch tilt axis |
+| **Lateral Half-Length** | $L_y$ | $0.19742$ | $\text{m}$ | Center of Mass to pod pivot roll axis |
+| **Radial Arm Radius** | $r$ | $0.28030$ | $\text{m}$ | $`r = \sqrt{L_x^2 + L_y^2}`$ |
+| **Moment of Inertia (X-axis)** | $J_{xx}$ | $0.0854$ | $\text{kg}\cdot\text{m}^2$ | CAD measured roll inertia |
+| **Moment of Inertia (Y-axis)** | $J_{yy}$ | $0.0921$ | $\text{kg}\cdot\text{m}^2$ | CAD measured pitch inertia |
+| **Moment of Inertia (Z-axis)** | $J_{zz}$ | $0.1458$ | $\text{kg}\cdot\text{m}^2$ | CAD measured yaw inertia |
+| **Number of BLDC Motors** | $N_m$ | $8$ | - | 4 coaxial counter-rotating pairs ($M_0 \dots M_7$) |
+| **Number of Gimbal Servos** | $N_s$ | $8$ | - | 4 outer pitch servos ($\alpha_i$) + 4 inner roll servos ($\beta_i$) |
+| **Max Rotor Angular Velocity** | $\Omega_{\max}$ | $1200$ | $\text{rad/s}$ | Maximum rotor speed limit |
+| **Rotor Thrust Coefficient** | $c_T$ | $8.548 \times 10^{-6}$ | $\text{N}\cdot\text{s}^2/\text{rad}^2$ | Aerodynamic lift constant |
+| **Rotor Drag Coefficient** | $c_Q$ | $0.06 \times c_T$ | $\text{N}\cdot\text{m}\cdot\text{s}^2/\text{rad}^2$ | Propeller reaction torque constant |
+| **Max Total Vertical Thrust** | $T_{\max}$ | $\approx 74.0$ | $\text{N}$ | Thrust-to-Weight Ratio $\approx 1.65$ |
 
 <p align="center">
   <img src="Virgo_UAV_PID_V2/video/coordinate_frames_morphquad.png" width="85%" alt="Virgo OMAV Coordinate Frames"/>
   <br/>
-  <em>Figure 2: Schematic of the drone highlighting coordinate frames and servo angles.</em>
+  <em>Figure 4: Kinematic schematic highlighting reference coordinate frames, pod positions, and gimbal tilt angles.</em>
 </p>
 
-### 3.1. Reference Frames & Geometric Definitions
-The system kinematics are defined across three primary reference frames:
-- **Inertial World Frame** ($\mathcal{W}$): Fixed reference frame adhering to the North-East-Down (NED) convention.
-- **Body-Fixed Frame** ($\mathcal{B}$): Frame centered at the vehicle Center of Mass (CoM).
-- **Propeller Frames** ($`\mathcal{P}_i`$, for $i \in \{1, 2, 3, 4\}$): Local coordinate frames fixed to each tilting pod pivot.
-- **Rotation Matrix** ($\mathbf{R} \in \mathrm{SO}(3)$): Orthogonal rotation matrix mapping coordinates from $\mathcal{B}$ to $\mathcal{W}$.
+### 3.2. Calibrated DYNAMIXEL Actuators & Belt-Pulley Transmission (arXiv:2607.02764)
 
-The orthogonal unit coordinate bases are defined as:
+To achieve realistic physics simulation without numerical artifacts, our Gazebo Harmonic model (`model.sdf`) and PX4 firmware modules incorporate exact mechatronic specifications from the MorphQuad hardware:
 
-$$
-\mathcal{W} = \{ \mathbf{i}_W, \mathbf{j}_W, \mathbf{k}_W \}, \quad \mathcal{B} = \{ \mathbf{i}_B, \mathbf{j}_B, \mathbf{k}_B \}, \quad \mathcal{P}_i = \{ \mathbf{i}_{P,i}, \mathbf{j}_{P,i}, \mathbf{k}_{P,i} \}
-$$
-
-The nominal positions of the 4 pod pivots relative to the CoM in $\mathcal{B}$ are:
-
-$$
-\mathbf{l}_1 = \begin{bmatrix} L_x \\ -L_y \\ 0 \end{bmatrix}, \quad \mathbf{l}_2 = \begin{bmatrix} L_x \\ L_y \\ 0 \end{bmatrix}, \quad \mathbf{l}_3 = \begin{bmatrix} -L_x \\ L_y \\ 0 \end{bmatrix}, \quad \mathbf{l}_4 = \begin{bmatrix} -L_x \\ -L_y \\ 0 \end{bmatrix}
-$$
-
-### 3.2. Pod Tilting Kinematics
-Each pod undergoes an extrinsic rotation parameterized by outer arm pitch angle $`\alpha_i`$ and inner shaft roll angle $`\beta_i`$. The unit thrust direction $`\hat{\mathbf{t}}_i \in \mathbb{S}^2`$ generated by the $i$-th pod in frame $\mathcal{B}$ is given by:
-
-$$
-\hat{\mathbf{t}}_i(\alpha_i, \beta_i) = \begin{bmatrix} -\sin\alpha_i \cos\beta_i \\ -\sin\beta_i \\ \cos\alpha_i \cos\beta_i \end{bmatrix}
-$$
-
-The net thrust vector $`\mathbf{t}_i`$ produced by the coaxial pair at pod $i$ is:
-
-$$
-\mathbf{t}_i = T_i \hat{\mathbf{t}}_i(\alpha_i, \beta_i), \quad T_i = c_T \left( \Omega_{i,\mathrm{top}}^2 + \Omega_{i,\mathrm{bot}}^2 \right)
-$$
-
-### 3.3. 6-DOF Rigid-Body Dynamics on Lie Group $\mathrm{SE}(3)$
-The complete nonlinear equations of motion for the fully-actuated morphing UAV are expressed as:
-
-$$
-\begin{aligned}
-\dot{\mathbf{p}} &= \mathbf{v} \\
-m \dot{\mathbf{v}} &= m \mathbf{g} + \mathbf{R} \mathbf{f}_d \\
-\dot{\mathbf{R}} &= \mathbf{R} [\boldsymbol{\omega}]_\times \\
-\mathbf{J}_{\mathcal{B}} \dot{\boldsymbol{\omega}} &= -\boldsymbol{\omega} \times (\mathbf{J}_{\mathcal{B}} \boldsymbol{\omega}) + \boldsymbol{\tau}_d
-\end{aligned}
-$$
-
-where:
-- $`\mathbf{p} = [x, y, z]^T \in \mathbb{R}^3`$ and $`\mathbf{v} = [v_x, v_y, v_z]^T \in \mathbb{R}^3`$ denote position and linear velocity in $\mathcal{W}$.
-- $`\boldsymbol{\omega} = [\omega_x, \omega_y, \omega_z]^T \in \mathbb{R}^3`$ denotes angular velocity in body frame $\mathcal{B}$.
-- The skew-symmetric cross-product operator $`[\boldsymbol{\omega}]_\times \in \mathfrak{so}(3)`$ is defined as:
-
-$$
-[\boldsymbol{\omega}]_\times = \begin{bmatrix} 0 & -\omega_z & \omega_y \\ \omega_z & 0 & -\omega_x \\ -\omega_y & \omega_x & 0 \end{bmatrix}
-$$
-
-- The total desired control force $`\mathbf{f}_d \in \mathbb{R}^3`$ and control torque $`\boldsymbol{\tau}_d \in \mathbb{R}^3`$ in $\mathcal{B}$ are:
-
-$$
-\mathbf{f}_d = \sum_{i=1}^4 \mathbf{t}_i = \sum_{i=1}^4 T_i \hat{\mathbf{t}}_i(\alpha_i, \beta_i)
-$$
-
-$$
-\boldsymbol{\tau}_d = \sum_{i=1}^4 \left( \mathbf{l}_i \times \mathbf{t}_i + \boldsymbol{\tau}_{M,i} \right)
-$$
-
-where $`\boldsymbol{\tau}_{M,i}`$ is the net aerodynamic reaction torque produced by the differential speed of the counter-rotating propellers:
-
-$$
-\boldsymbol{\tau}_{M,i} = c_Q \left( \Omega_{i,\mathrm{top}}^2 - \Omega_{i,\mathrm{bot}}^2 \right) \hat{\mathbf{t}}_i
-$$
-
-### 3.4. Control Allocation & Closed-Form Inversion
-The mapping from desired wrench $`\mathbf{w}_d = [\mathbf{f}_d^T, \boldsymbol{\tau}_d^T]^T \in \mathbb{R}^6`$ to individual pod thrusts $`\mathbf{T} = [T_1, T_2, T_3, T_4]^T`$ is formulated via the effectiveness matrix $`\mathbf{M}(\boldsymbol{\alpha}, \boldsymbol{\beta}) \in \mathbb{R}^{6 \times 4}`$:
-
-$$
-\mathbf{w}_d = \mathbf{M}(\boldsymbol{\alpha}, \boldsymbol{\beta}) \mathbf{T} + \mathbf{A}_\tau \Delta\mathbf{\Omega}^2
-$$
-
-To resolve pod thrusts and prevent gimbal lock singularities ($`|\beta_i| \to 90^\circ`$), the control allocation employs a **Minimum-Norm Pseudoinverse with Null-Space Projection**:
-
-$$
-\mathbf{T}^* = \mathbf{M}^\dagger \mathbf{w}_d + \left( \mathbf{I} - \mathbf{M}^\dagger \mathbf{M} \right) \mathbf{c}_{\mathrm{null}}
-$$
-
-Once the 3D thrust vector $`\mathbf{t}_i = [t_{i,x}, t_{i,y}, t_{i,z}]^T`$ is allocated to each pod, the unique physical gimbal angles $`\alpha_i, \beta_i`$ are solved analytically:
-
-$$
-\beta_i = -\arcsin\left( \frac{t_{i,y}}{\|\mathbf{t}_i\|} \right)
-$$
-
-$$
-\alpha_i = -\arcsin\left( \frac{t_{i,x}}{\|\mathbf{t}_i\| \cos\beta_i} \right)
-$$
-
----
-
-## 4. Control System Innovations & Firmware Architecture
+1. **Outer Pitch Axis ($`\alpha_i`$ - DYNAMIXEL XC330-M288-T @ 11.1V + GT2 Belt-Pulley Drive)**:
+   - **Hollow-Center Wire Routing**: The belt-pulley transmission offsets the servo from the rotation axis, leaving the central axis hollow. Motor power and ESC signal cables pass through the center with slack, allowing continuous rotation up to **$\pm 1080^\circ$ (3 full revolutions)** without cable tangling.
+   - **No-Backlash & Smooth Damping**: The GT2 timing belt eliminates mechanical gear backlash and isolates the servo from high-frequency rotor vibration.
+   - **Performance**: Slew rate limit $10.5\text{ rad/s}$ ($600^\circ/\text{s}$), peak torque $2.5\text{ N}\cdot\text{m}$, step response rise time **$119\text{ ms}$**, settling **$237\text{ ms}$**, overshoot **$0\%$** (Critically Damped).
+2. **Inner Roll Axis ($`\beta_i`$ - DYNAMIXEL XL330-M288-T @ 5.0V Inline Drive)**:
+   - Mounted inline to directly tilt the coaxial motor pair inside the pod duct.
+   - Slew rate limit $6.5\text{ rad/s}$ ($366^\circ/\text{s}$), peak torque $0.8\text{ N}\cdot\text{m}$, step response rise time **$182\text{ ms}$**, settling **$261\text{ ms}$**, overshoot **$< 1\%$**.
+3. **Coaxial Gyroscopic Cancellation ($\boldsymbol{\tau}_{\mathrm{gyro}} \approx 0$)**:
+   - Because each pod features two counter-rotating propellers spinning at equal speeds, the net angular momentum vanishes:
+     ```math
+     \mathbf{L}_{\mathrm{pod}} = \mathbf{J}_1 \boldsymbol{\omega}_1 + \mathbf{J}_2 \boldsymbol{\omega}_2 \approx \mathbf{0}
+     ```
+   - Gyroscopic precession torque $\boldsymbol{\tau}_{\mathrm{gyro}} = \mathbf{L}_{\mathrm{pod}} \times \dot{\boldsymbol{\alpha}}$ is eliminated, allowing micro-servos (18g) to tilt $2.8\text{ kg}$ thrust pods rapidly without stalling.
 
 <p align="center">
-  <img src="Virgo_UAV_PID_V2/video/control_architecture_diagram.png" width="90%" alt="Control System Architecture Diagram"/>
+  <img src="Virgo_NMPC_v3/docs/servo_morphquad_step_response.png" width="95%" alt="Actuator Step Response Verification"/>
   <br/>
-  <em>Figure 3: Cascaded SE(3) Geometric Controller, Control Allocator, and Dynamics feedback loops.</em>
+  <em>Figure 5: Measured 90° step response of outer and inner gimbal actuators in Gazebo Harmonic, validating exact agreement with Figure 4(D) of the MorphQuad reference paper.</em>
 </p>
-
-### 4.1. Core Controller Upgrades in V2
-During experimental flight validation, our team identified and resolved several critical aero-mechanical phenomena:
-
-1. **Elimination of the 0.53 Hz Limit Cycle Oscillation (Anti-Oscillation Control)**:
-   - *Problem*: In initial testing, Yaw torque was simultaneously allocated to servo tangential vectoring and coaxial rotor reaction torque. Due to the significant time-scale separation between electromagnetic motor response ($\sim 10\text{ ms}$) and mechanical servo slew rate ($\sim 150\text{ ms}$), an asymmetric phase delay triggered a continuous $\pm 20^\circ$ servo hunting limit cycle at $0.53\text{ Hz}$, dragging all 6 DOFs into coupled oscillations.
-   - *Solution*: Set `tau_z_scaled = 0.0f` in [`ActuatorEffectivenessVirgo.cpp`](Virgo_UAV_PID_V2/px4_modifications/ActuatorEffectivenessVirgo.cpp). 100% of Yaw authority is allocated exclusively to the instantaneous differential rotor reaction torque:
-
-     ```math
-     \tau_{z,\mathrm{rotor}} = c_Q \sum_{i=1}^4 (-1)^i \Delta\Omega_i^2
-     ```
-
-     This completely eliminated servo hunting and damped 6-DOF tracking oscillations by **68.8%**.
-
-2. **Phase-Lead Derivative Feedforward (`tau_lead = 0.015s`)**:
-   - Integrated a low-pass filtered derivative compensator on servo position commands to predict trajectory curvatures and cancel servo gear-train lag:
-
-     ```math
-     \alpha_{i,\mathrm{cmd}} = \alpha_i + \tau_{\mathrm{lead}} \cdot \dot{\alpha}_{i,\mathrm{filtered}}
-     ```
-
-3. **Elimination of Ground Startup Twitching (Contact Dynamics Optimization)**:
-   - *Problem*: In Gazebo, using raw CAD mesh STL collisions with over 360 bottom vertices on flat ground created severe numerical chatter in ODE's Linear Complementarity Problem (LCP) solver, causing the UAV to twitch and rotate up to **153.2°** before takeoff.
-   - *Solution*: Replaced mesh collisions in [`model.sdf`](Virgo_UAV_PID_V2/models/virgo/model.sdf) with **4 analytical spherical contact feet** ($r = 0.010\text{ m}$) at exact CAD landing pad positions. Tuned joint position controller stiffness to eliminate internal chatter. Ground drift dropped to **0.058 m** (-83.1%) and ground rotation dropped to **4.3°** (-97.2%).
-
-4. **Smooth Touchdown & Servo Neutral Lock**:
-   - Configured an automatic land detector threshold: below $0.40\text{ m}$ altitude and upon ground contact, all 8 servos are locked strictly upright at $0.00^\circ$ neutral, preventing post-landing rotation.
 
 ---
 
-## 5. Flight Benchmark & Telemetry Analysis
-
-### 5.1. The 25m × 25m Decoupled 6-DOF Square Trajectory Benchmark
-To rigorously evaluate independent 6-DOF control authority, we designed a benchmark flight with **corner stationary attitude transitions** and **constant 30° attitude holding** along each $25\text{m}$ edge:
+## 4. Control Architectures & Stability Innovations
 
 ```mermaid
-flowchart LR
-    Start["Takeoff (1.5m)"] --> Corner0["Stationary Hover (0,0)<br/>Tilt Roll = +30°"]
-    Corner0 --> Edge1["Edge 1: (0,0) -> (25,0)m<br/>Cruise +X | Constant Roll = +30°"]
-    Edge1 --> Corner1["Stationary Hover (25,0)<br/>Transition: Roll 30° -> Pitch 30°"]
-    Corner1 --> Edge2["Edge 2: (25,0) -> (25,25)m<br/>Cruise +Y | Constant Pitch = +30°"]
-    Edge2 --> Corner2["Stationary Hover (25,25)<br/>Transition: Pitch 30° -> Yaw 30°"]
-    Corner2 --> Edge3["Edge 3: (25,25) -> (0,25)m<br/>Cruise -X | Constant Yaw = +30°"]
-    Edge3 --> Corner3["Stationary Hover (0,25)<br/>Transition: Yaw 30° -> Zero-Tilt 0°"]
-    Corner3 --> Edge4["Edge 4: (0,25) -> (0,0)m<br/>Cruise -Y | Zero-Tilt (0°, 0°, 0°)"]
-    Edge4 --> Land["Smooth Land & Disarm<br/>Servos Locked 0.00°"]
+flowchart TD
+    subgraph Planner["High-Level Planning"]
+        Traj["Septic Minimum-Jerk Trajectory Generator<br/>Pos, Vel, Acc, Jerk = 0 at boundaries"]
+    end
+
+    subgraph Controllers["Control Architectures"]
+        direction TB
+        subgraph NMPC_Box["Controller 2: Full-State SE(3) NMPC (V3)"]
+            NMPC["Optimal Lookahead Horizon (N=20, dt=0.04s)<br/>Multiple Shooting RK4 with CasADi / Ipopt"]
+        end
+        subgraph PID_Box["Controller 1: Cascaded SE(3) PID (V2)"]
+            PID["Position PID + Geometric SO(3) Attitude<br/>Anti-Oscillation Tuning (tau_lead = 15ms)"]
+        end
+    end
+
+    subgraph Allocator["Firmware Allocation: ActuatorEffectivenessVirgo.cpp"]
+        Vec["Authority Decoupling:<br/>Servos: Pure Translation f_d + Filtered Yaw Trim<br/>Motors: Instantaneous Roll/Pitch Diff + Rotor Reaction Yaw"]
+        Cross["Cross-Axis Decoupling:<br/>tau_parasitic = tau_yaw_rotor * proj(alpha, beta)"]
+        LPF["Hardware Filters:<br/>Outer 8.0 Hz (10.0 rad/s) | Inner 5.2 Hz (6.4 rad/s)"]
+    end
+
+    subgraph Hardware["Virgo OMAV Actuators"]
+        Servos["8 Gimbal Servos (DYNAMIXEL XC330 / XL330)"]
+        BLDC["8 BLDC Motors (T-Motor VELOX 3008 1500KV)"]
+    end
+
+    Traj --> NMPC
+    Traj --> PID
+    NMPC --> Allocator
+    PID --> Allocator
+    Allocator --> Vec --> Cross --> LPF
+    LPF --> Servos
+    Cross --> BLDC
 ```
 
-<p align="center">
-  <img src="Virgo_UAV_PID_V2/docs/flight_plots/virgo_square_decoupled_1794365810_analysis.png" width="95%" alt="Virgo Square Decoupled 30 Deg Analysis Plot"/>
-  <br/>
-  <em>Figure 4: Publication-quality 6-panel flight telemetry analysis for the 25m × 25m decoupled square trajectory benchmark (Run 1794365810).</em>
-</p>
-
-### 5.2. Segment-by-Segment Telemetry Performance (Run `1794365810`)
-
-| Flight Segment | Commanded Attitude | Achieved Attitude | Cross-Track Drift | Altitude Z | Evaluation Remarks |
-| :--- | :---: | :---: | :---: | :---: | :--- |
-| **Origin Hover (0, 0)** | $\text{Roll} = +30.0^\circ$ | **26.8°** | $< 0.05\text{ m}$ | **1.50 m** | Pure decoupled hover with zero position drift |
-| **Edge 1: (0, 0) → (+25, 0) m** | Hold $\text{Roll} = +30.0^\circ$ | **25.8°** (Pitch $0.5^\circ$, Yaw $-0.5^\circ$) | $`Y_{\text{drift}} = -0.25\text{ m}`$ | **1.50 m** | Cruising $+X$, servos tilt $26^\circ$ to cancel lateral force |
-| **Corner 1 (+25, 0) m** | Roll $\to$ Pitch $30.0^\circ$ | Smooth quintic polynomial ($4.0\text{s}$) | $< 0.03\text{ m}$ | **1.50 m** | Clean stationary attitude transition |
-| **Edge 2: (+25, 0) → (+25, +25) m** | Hold $\text{Pitch} = +30.0^\circ$ | **30.0°** (100% Exact) | $`X_{\text{drift}} = +0.02\text{ m}`$ | **1.50 m** | Cruising $+Y$, cross-track drift only **2 cm** |
-| **Corner 2 (+25, +25) m** | Pitch $\to$ Yaw $30.0^\circ$ | Smooth quintic polynomial ($4.0\text{s}$) | $< 0.04\text{ m}$ | **1.50 m** | Pitch resets to $0^\circ$, heading turns to $30^\circ$ |
-| **Edge 3: (+25, +25) → (0, +25) m** | Hold $\text{Yaw} = +30.0^\circ$ | **32.2°** (Roll $0.0^\circ$, Pitch $2.3^\circ$) | $`Y_{\text{drift}} = -0.10\text{ m}`$ | **1.50 m** | Reverse $-X$ cruise with fixed oblique heading |
-| **Corner 3 (0, +25) m** | Yaw $\to$ Flat ($0^\circ, 0^\circ, 0^\circ$) | Smooth quintic polynomial ($4.0\text{s}$) | $< 0.02\text{ m}$ | **1.50 m** | Body orientation restores to nominal flat frame |
-| **Edge 4: (0, +25) → (0, 0) m** | Zero-Tilt ($0^\circ, 0^\circ, 0^\circ$) | $\text{Roll} = -0.1^\circ, \text{Pitch} = -0.0^\circ$ | $`X_{\text{drift}} = -0.04\text{ m}`$ | **1.53 m** | Nominal flat flight returning to home origin |
-| **Touchdown & Disarm** | Vertical descent $0.25\text{ m/s}$ | Touchdown at $Z = 0.012\text{ m}$ | $< 0.05\text{ m}$ | **0.01 m** | **Servos locked at 0.00° (Zero post-landing spinning)** |
-
-### 5.3. Comparative Anti-Oscillation Telemetry
-
-<p align="center">
-  <img src="Virgo_UAV_PID_V2/docs/flight_plots/virgo_anti_oscillation_comparison.png" width="95%" alt="Comparative Anti-Oscillation Benchmark"/>
-  <br/>
-  <em>Figure 5: Comparative flight telemetry before (1794361715) and after (1794363687) implementing spherical feet and pure coaxial differential yaw allocation.</em>
-</p>
-
-| Performance Metric | Baseline Run (`1794361715`) | Tuned Anti-Oscillation Run (`1794363687`) | Improvement |
-| :--- | :---: | :---: | :---: |
-| **Ground Startup Yaw Spin** | $153.17^\circ$ | **4.33°** | **-97.2% (Eliminated ground spin)** |
-| **Ground Startup Horizontal Drift** | $0.342\text{ m}$ | **0.058 m** | **-83.1% (Eliminated solver twitch)** |
-| **Yaw Angular Variation Rate** | $15.08^\circ/\text{s}$ | **4.70°/s** | **-68.8% (Eliminated yaw hunting)** |
-| **Roll Angular Variation Rate** | $3.83^\circ/\text{s}$ | **1.72°/s** | **-55.1% (Solid, damped airframe)** |
-| **Mean Roll Tracking Error** | $2.04^\circ$ | **1.16°** | **-43.1%** |
-| **Mean Pitch Tracking Error** | $1.79^\circ$ | **1.12°** | **-37.4%** |
-| **Mean Yaw Tracking Error** | $10.35^\circ$ | **5.53°** | **-46.6%** |
-| **Servo** $`\alpha_0`$ **Slew Jerkiness** | $21.70^\circ/\text{s}$ | **11.80°/s** | **-45.6% (Smooth servo motion)** |
+### 4.1. Core Stability Breakthroughs
+1. **Actuator Authority Separation & Servo Anti-Jitter Decoupling**:
+   - The nominal pod vectoring force:
+     ```math
+     \mathbf{t}_{\mathrm{vec}, i} = \frac{1}{4}\mathbf{f}_{d,\mathrm{flu}} + \frac{1}{4}\tau_{z,\mathrm{scaled}} \, \mathbf{t}_{\psi, i}
+     ```
+     drives the pod tilt angles $`(\alpha_i, \beta_i)`$ purely for 3D translational motion and slow yaw trim. Fast Roll/Pitch attitude torque commands $`(\tau_x, \tau_y)`$ are strictly excluded from the servo vectoring channel.
+   - 100% of fast attitude rate stabilization is handled by differential rotor thrust $`(\Delta T_{\mathrm{roll}}, \Delta T_{\mathrm{pitch}})`$ responding in $< 10\text{ ms}$, dropping mean servo speed by **49.3%** and completely eliminating high-frequency servo chatter.
+2. **Hybrid Frequency-Divided Yaw Control (Dual-Layer Allocation)**:
+   - **Layer 1 (Servos)**: Low-pass filtered ($\sim 0.8\text{ Hz}$) tangential vectoring provides up to $1.5\text{ N}\cdot\text{m}$ continuous yaw torque without limit cycle hunting.
+   - **Layer 2 (Rotors)**: Instantaneous coaxial differential reaction torque provides rate damping with zero phase delay.
+3. **Cross-Axis Parasitic Decoupling**:
+   - When pods tilt in 3D ($`\boldsymbol{\alpha}, \boldsymbol{\beta}`$), motor reaction torque projects into Roll ($`\tau_x`$) and Pitch ($`\tau_y`$). We subtract this projection in real-time:
+     ```math
+     \tau_{x,\mathrm{decoupled}} = \tau_{x,\mathrm{cmd}} - \tau_{z,\mathrm{rotor}} \cdot \bar{t}_{x,\mathrm{proj}}, \quad
+     \tau_{y,\mathrm{decoupled}} = \tau_{y,\mathrm{cmd}} - \tau_{z,\mathrm{rotor}} \cdot \bar{t}_{y,\mathrm{proj}}
+     ```
+4. **Landing Mode-Switching Snap Elimination**:
+   - Lowered the `near_ground` threshold in `MulticopterPositionControl.cpp` from $0.40\text{ m}$ to $0.08\text{ m}$, maintaining 6-DOF allocation until touchdown and guaranteeing level deck touchdown ($< 0.4^\circ$).
+5. **Contact Dynamics Optimization**:
+   - Analytical spherical contact feet ($r = 0.010\text{ m}$) replace mesh collisions in ODE physics, eliminating ground startup twitching (-97.2% rotation drop).
 
 ---
 
-## 6. Initial Research Remarks & Future Controller Roadmap
-
-### Academic Insights & Discoveries
-1. **Actuator Time-Scale Separation Principle**: In morphing multirotors, coupling slow mechanical tilting degrees of freedom with fast aerodynamic torques creates destabilizing phase lags. Allocating high-frequency attitude corrections (Yaw rate) to electromagnetic motor differentials while dedicating servos to lower-frequency force vectoring is essential for numerical and physical stability.
-2. **Contact Dynamics & Simulator Realism**: High-order polyhedral CAD meshes must not be used directly as collision geometries in ODE/Bullet physics engines. Spherical contact modeling provides smooth analytical gradients required for stable multi-contact ground interactions.
-
-### Future Research Roadmap
-- [x] **Nonlinear Model Predictive Control (NMPC) on** $\mathrm{SE}(3)$ (**Implemented in `Virgo_NMPC_v3`**): Formulated full 6-DOF optimal lookahead horizon with explicit mechanical servo rate limits ($`\dot{\alpha}_{\max}, \dot{\beta}_{\max}`$), continuous CasADi/Ipopt + ACADOS solver, zero-jerk septic trajectory profiling, and real-time MAVLink bridge to PX4 SITL & Gazebo Harmonic.
-- [ ] $`\mathcal{L}_1`$ **Adaptive Disturbance Observer**: Estimate and reject real-time aerodynamic downwash interactions between adjacent propeller ducts during high-tilt transitions.
-- [ ] **Hardware-in-the-Loop (HIL) & Physical Prototype Deployment**: Port firmware to a custom carbon-fiber airframe equipped with Pixhawk 6X and CAN-bus servos.
-
----
-
-## 7. Repository File Structure
+## 5. Repository Structure
 
 ```text
-Virgo_UAV_PID_v2/
-├── .gitignore
-├── README.md                                  # Top-level academic & technical documentation
-├── Virgo_NMPC_v3/                             # [NEW V3] SE(3) Nonlinear Model Predictive Control
-│   ├── README.md                              # Academic NMPC formulation & Gazebo results
-│   ├── setup_environment.sh                   # Automated CasADi/ACADOS environment setup
-│   ├── config/                                # Vehicle (4.56kg) & NMPC horizon/weight configs
-│   ├── models/                                # SE(3) kinematics & CasADi symbolic dynamics
-│   ├── solver/                                # Real-time Multiple Shooting IPOPT / ACADOS
-│   ├── controllers/                           # Trajectory generator & NMPC controller manager
+Virgo_UAV_Controller_Design/
+├── README.md                                  # Master documentation, benchmark & comparison
+├── Virgo_NMPC_v3/                             # [CONTROLLER 2] SE(3) Nonlinear Model Predictive Control
+│   ├── README.md                              # Detailed NMPC formulation & Gazebo results
+│   ├── setup_environment.sh                   # One-click CasADi / ACADOS installer
+│   ├── config/
+│   │   ├── virgo_params.yaml                  # Vehicle mass (4.56kg), geometry & actuator limits
+│   │   └── nmpc_config.yaml                   # Horizon N=20, dt=0.04s, weight matrices Q, R
+│   ├── models/
+│   │   ├── se3_kinematics.py                  # Lie group SE(3), SO(3) & quaternion mathematics
+│   │   └── virgo_casadi_model.py              # Symbolic CasADi dynamics & RK4 integrator
+│   ├── solver/
+│   │   ├── casadi_nmpc_solver.py              # Real-time Multiple Shooting IPOPT solver (18 ms)
+│   │   └── generate_acados_solver.py          # ACADOS C-code generator (HPIPM / RTI SQP)
+│   ├── controllers/
+│   │   ├── trajectory_generator.py            # Septic minimum-jerk 25m square trajectory generator
+│   │   └── virgo_nmpc_controller.py           # High-level NMPC controller manager
 │   ├── simulation/
-│   │   ├── run_gazebo_nmpc_test.sh            # Automated SITL + Gazebo Harmonic test runner
-│   │   ├── run_nmpc_standalone_sim.py         # Standalone 6-DOF numerical simulation
-│   │   └── benchmark_nmpc_square.py           # NMPC vs PID performance evaluator
+│   │   ├── run_gazebo_nmpc_test.sh            # Automated SITL + Gazebo Harmonic test launcher
+│   │   ├── run_nmpc_standalone_sim.py         # Standalone 6-DOF numerical flight simulator
+│   │   └── benchmark_nmpc_square.py           # 4-panel NMPC vs PID comparative benchmark evaluator
 │   ├── ros2_px4_bridge/
 │   │   ├── px4_mavlink_nmpc_bridge.py         # Direct MAVLink offboard runner
 │   │   └── virgo_nmpc_node.py                 # ROS 2 Humble node
-│   └── docs/                                  # Telemetry CSV logs & 6-panel analysis figures
-├── Virgo_UAV_PID_V2/                          # Core simulation & cascaded PID control framework
+│   └── docs/                                  # Telemetry CSV logs & analysis figures
+│       ├── gazebo_nmpc_flight_1795318332.csv.gz # Verified 25m square flight log
+│       ├── gazebo_nmpc_flight_1795318332_analysis.png # 6-panel flight telemetry plot
+│       ├── gazebo_nmpc_vs_pid_comparison_benchmark.png # 4-panel NMPC vs PID comparison figure
+│       └── servo_morphquad_step_response.png  # Actuator step response verification plot
+├── Virgo_UAV_PID_V2/                          # [CONTROLLER 1] Cascaded SE(3) PID Framework
 │   ├── airframes/
 │   │   └── 4027_gz_virgo                      # PX4 airframe startup script (CA_AIRFRAME=18)
 │   ├── docs/
-│   │   ├── flight_logs/                       # Compressed telemetry logs (.csv.gz)
-│   │   ├── flight_plots/                      # High-resolution analysis figures (.png)
+│   │   ├── flight_logs/                       # Telemetry logs (.csv.gz)
+│   │   ├── flight_plots/                      # Telemetry figures (.png)
 │   │   └── VIRGO_MATHEMATICAL_MODEL.md        # Mathematical derivations
 │   ├── models/
-│   │   ├── auv_usdf_v2/                       # SolidWorks CAD model for Gazebo
-│   │   └── virgo/                             # Gazebo model SDF with spherical feet & plugins
+│   │   ├── auv_usdf_v2/                       # SolidWorks CAD package
+│   │   └── virgo/                             # Gazebo model SDF with calibrated DYNAMIXEL joints
 │   ├── px4_modifications/                     # Modified PX4 C++ modules
-│   │   ├── ActuatorEffectivenessVirgo.cpp     # Anti-oscillation & null-space allocator
+│   │   ├── ActuatorEffectivenessVirgo.cpp     # Anti-jitter, null-space & authority allocator
 │   │   ├── ActuatorEffectivenessVirgo.hpp
-│   │   └── MulticopterPositionControl.cpp     # 6-DOF attitude & level touchdown logic
-│   ├── ros2_ws/                               # ROS 2 Humble workspace
-│   │   └── src/virgo_missions/                # Geometric SE(3) tracking node
+│   │   └── MulticopterPositionControl.cpp     # 6-DOF position & level touchdown logic
 │   ├── scripts/
 │   │   ├── plot_anti_oscillation_comparison.py # Comparative analysis script
 │   │   ├── plot_flight_data.py                # 6-panel telemetry plotter
 │   │   ├── run_auto_test.sh                   # All-in-one automated benchmark runner
-│   │   ├── test_omav_rotation_360.py          # Continuous 360° roll/pitch aerobatics test
 │   │   └── test_square_decoupled_6dof.py      # Final verified 25m square decoupled test
-│   └── video/                                 # Multimedia demonstrations & figures
-│       ├── cad_full_assembly_rendering.jpeg   # High-resolution SolidWorks CAD render
-│       ├── control_architecture_diagram.png   # Control architecture block diagram
-│       ├── coordinate_frames_morphquad.png    # MorphQuad mathematical frame diagram
-│       └── flight_simulation_demo.gif         # 3D Gazebo flight simulation recording
+│   └── video/                                 # Multimedia demonstrations & CAD renderings
 └── Virgo_USDF_V2/                             # SolidWorks URDF Export ROS Package
     ├── CMakeLists.txt
     ├── package.xml
     ├── config/joint_names_AUV_USDF_V2.yaml
-    ├── launch/
-    │   ├── display.launch                     # RViz model visualizer
-    │   └── gazebo.launch                      # Gazebo world spawn launch
-    ├── meshes/                                # High-precision CAD STL meshes
-    └── urdf/
-        ├── AUV_USDF_V2.csv                    # Mass & inertia properties
-        └── AUV_USDF_V2.urdf                   # Complete robot kinematic description
+    ├── launch/display.launch
+    ├── meshes/                                # Precision CAD STL meshes
+    └── urdf/AUV_USDF_V2.urdf                  # Full kinematic description
 ```
 
 ---
 
-## 8. Setup, Build & Quickstart Reproduction Guide
+## 6. Setup & Quickstart Reproduction Guide
 
 ### Prerequisites
 - **Ubuntu Linux 22.04 LTS (Jammy Jellyfish)**
@@ -351,8 +270,8 @@ Virgo_UAV_PID_v2/
 
 ### Step 1: Clone Repository
 ```bash
-git clone https://github.com/ducntt2003-crypto/Virgo_UAV_PID_v2.git
-cd Virgo_UAV_PID_v2
+git clone https://github.com/ducntt2003-crypto/Virgo_UAV_Controller_Design.git
+cd Virgo_UAV_Controller_Design
 ```
 
 ### Step 2: Install PX4 Autopilot & Synchronize Airframe
@@ -362,42 +281,39 @@ git clone https://github.com/PX4/PX4-Autopilot.git ~/PX4/PX4-Autopilot
 cd ~/PX4/PX4-Autopilot
 
 # Copy Virgo OMAV airframe, models, and position control modifications into PX4 tree
-cp /path/to/Virgo_UAV_PID_v2/Virgo_UAV_PID_V2/airframes/4027_gz_virgo ROMFS/px4fmu_common/init.d-posix/airframes/
-cp -r /path/to/Virgo_UAV_PID_v2/Virgo_UAV_PID_V2/models/virgo Tools/simulation/gz/models/
-cp /path/to/Virgo_UAV_PID_v2/Virgo_UAV_PID_V2/px4_modifications/ActuatorEffectivenessVirgo.* src/modules/control_allocator/VehicleActuatorEffectiveness/
-cp /path/to/Virgo_UAV_PID_v2/Virgo_UAV_PID_V2/px4_modifications/MulticopterPositionControl.* src/modules/mc_pos_control/
+cp /path/to/Virgo_UAV_Controller_Design/Virgo_UAV_PID_V2/airframes/4027_gz_virgo ROMFS/px4fmu_common/init.d-posix/airframes/
+cp -r /path/to/Virgo_UAV_Controller_Design/Virgo_UAV_PID_V2/models/virgo Tools/simulation/gz/models/
+cp /path/to/Virgo_UAV_Controller_Design/Virgo_UAV_PID_V2/px4_modifications/ActuatorEffectivenessVirgo.* src/modules/control_allocator/VehicleActuatorEffectiveness/
+cp /path/to/Virgo_UAV_Controller_Design/Virgo_UAV_PID_V2/px4_modifications/MulticopterPositionControl.* src/modules/mc_pos_control/
 
 # Compile PX4 SITL target
 make px4_sitl gz_virgo
 ```
 
-### Step 3: Run the V3 SE(3) NMPC Gazebo Harmonic Benchmark (Latest)
-To execute the latest automated 25m decoupled 6-DOF benchmark with SE(3) NMPC and 3D Gazebo GUI:
-
+### Step 3: Run the SE(3) NMPC Gazebo Harmonic Benchmark (Controller 2)
+To launch PX4 SITL + Gazebo Harmonic and run the 25m decoupled mission with 3D graphical window:
 ```bash
 cd Virgo_NMPC_v3
 ./simulation/run_gazebo_nmpc_test.sh --gui
 ```
-*(For headless testing without GUI: `./simulation/run_gazebo_nmpc_test.sh`)*
+*(For headless execution without 3D GUI: `./simulation/run_gazebo_nmpc_test.sh`)*
 
-### Step 4: Run the V2 Cascaded PID Benchmark
+### Step 4: Run the Cascaded SE(3) PID Benchmark (Controller 1)
 ```bash
-/home/duc/Omini_UAV/Virgo_UAV_PID_V2/scripts/run_auto_test.sh square --gui
+cd Virgo_UAV_PID_V2
+./scripts/run_auto_test.sh square --gui
 ```
 
-Alternatively, run in two separate terminals:
-* **Terminal 1 (Simulation Server & 3D GUI)**:
-  ```bash
-  cd ~/PX4/PX4-Autopilot && make px4_sitl gz_virgo
-  ```
-* **Terminal 2 (Trajectory Benchmark Runner)**:
-  ```bash
-  python3 /home/duc/Omini_UAV/Virgo_UAV_PID_V2/scripts/test_square_decoupled_6dof.py --side 25.0 --speed 1.5
-  ```
+### Step 5: Regenerate Benchmark Comparison Figures
+To compare the latest flight telemetry against baseline PID and produce Figure 2:
+```bash
+cd Virgo_NMPC_v3
+python3 simulation/benchmark_nmpc_square.py
+```
 
 ---
 
-## 9. Citation & References
+## 7. Citation & References
 
 If you utilize this framework, CAD models, or control allocation algorithms in your research, please cite:
 
@@ -428,5 +344,5 @@ If you utilize this framework, CAD models, or control allocation algorithms in y
 
 ---
 
-## 10. License & Contributing
-This project is released under the **Apache-2.0 License**. Contributions, bug reports, and pull requests are warmly welcomed!
+## 8. License & Contributing
+This project is released under the **Apache-2.0 License**. Contributions, discussions, and pull requests are warmly welcomed!
