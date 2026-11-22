@@ -117,24 +117,24 @@ We validated the NMPC controller on the **25m × 25m Decoupled Square Trajectory
 - **Edge 4**: $25\text{ m}$ translation along $-Y$ returning to origin $(0, 0)$ in Flat $0^\circ$ posture.
 - **Landing**: Hover settle for 1.5s, 6-DOF descent with $0^\circ$ attitude until touchdown, and disarm.
 
-### 4.1. Real-Time Hardware-in-the-Loop & Gazebo Harmonic Simulation Results (Run ID: 1795316761)
+### 4.1. Real-Time Hardware-in-the-Loop & Gazebo Harmonic Simulation Results (Run ID: 1795318332)
 
 | Flight Metric | Baseline Cascaded PID | SE(3) NMPC (Gazebo Harmonic) | Quantitative Improvement |
 | :--- | :---: | :---: | :---: |
-| **Mean Horizontal Position Error** | $0.53\text{ m}$ | **0.12 m** | **+76.6% Outstanding Improvement** |
-| **Horizontal Position RMSE** | $0.59\text{ m}$ | **0.15 m** | **+75.2% Error Reduction** |
-| **Maximum Lateral Drift** | $1.05\text{ m}$ | **0.48 m** | **+54.9% Drift Suppression** |
-| **Mean Roll Tracking Error** | $1.99^\circ$ | **0.69°** | **+65.6% Sub-Degree Precision** |
-| **Mean Pitch Tracking Error** | $1.29^\circ$ | **0.30°** | **+76.5% Near-Zero Error** |
-| **Mean Yaw Tracking Error** | $4.13^\circ$ | **0.54°** | **+87.0% Hunting Elimination** |
+| **Mean Horizontal Position Error** | $0.53\text{ m}$ | **0.12 m** | **+77.5% Outstanding Improvement** |
+| **Horizontal Position RMSE** | $0.59\text{ m}$ | **0.14 m** | **+75.8% Error Reduction** |
+| **Maximum Lateral Drift** | $1.05\text{ m}$ | **0.47 m** | **+55.7% Drift Suppression** |
+| **Mean Roll Tracking Error** | $1.99^\circ$ | **0.70°** | **+64.8% Sub-Degree Precision** |
+| **Mean Pitch Tracking Error** | $1.29^\circ$ | **0.31°** | **+75.7% Near-Zero Error** |
+| **Mean Yaw Tracking Error** | $4.13^\circ$ | **0.65°** | **+84.3% Hunting Elimination** |
 | **Max Landing Roll Angle** | $20.26^\circ$ *(Severe Snap)* | **0.38°** *(Level Deck Touchdown)* | **Snap Completely Eliminated** |
 | **Max Landing Pitch Angle** | $14.58^\circ$ | **0.25°** *(Level Deck Touchdown)* | **Snap Completely Eliminated** |
 | **Mean NMPC Solver Latency** | N/A (Reactive) | **18.97 ms** | **Real-Time (< 40 ms Deadline)** |
 
 <p align="center">
-  <img src="docs/gazebo_nmpc_flight_1795316761_analysis.png" width="95%" alt="Gazebo Harmonic 6-Panel Flight Telemetry"/>
+  <img src="docs/gazebo_nmpc_flight_1795318332_analysis.png" width="95%" alt="Gazebo Harmonic 6-Panel Flight Telemetry"/>
   <br/>
-  <em>Figure 2: 6-Panel telemetry of the 25m decoupled square mission in Gazebo Harmonic with PX4 Autopilot SITL (Run ID: 1795316761).</em>
+  <em>Figure 2: 6-Panel telemetry of the 25m decoupled square mission in Gazebo Harmonic with PX4 Autopilot SITL (Run ID: 1795318332).</em>
 </p>
 
 ### 4.2. Stability Innovations & Actuator Mechatronics Calibration
@@ -188,8 +188,8 @@ Virgo_NMPC_v3/
 │   ├── px4_mavlink_nmpc_bridge.py     # Direct MAVLink bridge for PX4 SITL & Gazebo
 │   └── virgo_nmpc_node.py             # ROS 2 Humble node (Micro-XRCE-DDS)
 └── docs/
-    ├── gazebo_nmpc_flight_1795316761.csv.gz       # Flight telemetry log (Gazebo Harmonic)
-    ├── gazebo_nmpc_flight_1795316761_analysis.png # 6-panel flight telemetry analysis plot
+    ├── gazebo_nmpc_flight_1795318332.csv.gz       # Flight telemetry log (Gazebo Harmonic)
+    ├── gazebo_nmpc_flight_1795318332_analysis.png # 6-panel flight telemetry analysis plot
     ├── servo_morphquad_step_response.png         # Actuator step response benchmark (Figure 4D)
     ├── gazebo_nmpc_vs_pid_comparison_benchmark.png # NMPC vs PID full Gazebo benchmark comparison
     ├── nmpc_square_decoupled_telemetry.csv.gz     # Standalone simulation telemetry
