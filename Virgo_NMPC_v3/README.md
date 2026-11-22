@@ -143,8 +143,12 @@ We validated the NMPC controller on the **25m × 25m Decoupled Square Trajectory
    - **Inner Roll Servos (XL330-M288-T @ 5.0V Inline)**: Modeled with 61 RPM ($6.4\text{ rad/s}$), $0.8\text{ N}\cdot\text{m}$ torque limit, $5.2\text{ Hz}$ bandwidth ($182\text{ ms}$ rise time, $< 1\%$ overshoot).
    - **Step Response Verification**: Standalone validation (`docs/servo_morphquad_step_response.png`) confirms exact alignment with Figure 4(D) of the MorphQuad reference paper.
 2. **Actuator Authority Separation & Servo Anti-Jitter Decoupling**:
-   - **Gimbal Pod Servos (Vectoring)**: Vectoring force $\mathbf{t}_{\mathrm{vec}, i} = \mathbf{f}_{d,\mathrm{flu}} \cdot 0.25 + \mathbf{t}_{\psi, i} \cdot (\tau_{z,\mathrm{scaled}} \cdot 0.25)$ drives the pod tilt angles $(\alpha_i, \beta_i)$ purely for translational motion and slow yaw trim. Fast Roll/Pitch attitude torque commands $(\tau_x, \tau_y)$ are strictly excluded from the servo vectoring equation.
-   - **BLDC Coaxial Motors (Attitude Stabilization)**: 100% of fast attitude rate stabilization is handled by differential rotor thrust ($\Delta T_{\mathrm{roll}}, \Delta T_{\mathrm{pitch}}$) responding instantaneously (< 10 ms).
+   - **Gimbal Pod Servos (Vectoring)**: The nominal pod vectoring force:
+     ```math
+     \mathbf{t}_{\mathrm{vec}, i} = \frac{1}{4}\mathbf{f}_{d,\mathrm{flu}} + \frac{1}{4}\tau_{z,\mathrm{scaled}} \, \mathbf{t}_{\psi, i}
+     ```
+     drives the pod tilt angles $`(\alpha_i, \beta_i)`$ purely for 3D translational motion and slow yaw trim. Fast Roll/Pitch attitude torque commands $`(\tau_x, \tau_y)`$ are strictly excluded from the servo vectoring channel.
+   - **BLDC Coaxial Motors (Attitude Stabilization)**: 100% of fast attitude rate stabilization is handled by differential rotor thrust $`(\Delta T_{\mathrm{roll}}, \Delta T_{\mathrm{pitch}})`$ responding instantaneously (< 10 ms).
    - **Servo Velocity Smoothing**: Mean servo speed dropped by **49.3%** (from $45.8^\circ/\text{s}$ down to $23.2^\circ/\text{s}$) with completely eliminated servo chatter.
 3. **Hybrid Frequency-Divided Yaw Control (Dual-Layer Allocation)**:
    - **Slow Low-Pass Filtered Layer ($\mathbf{t}_\psi$, $\sim 0.8\text{ Hz}$)**: Drives servos only with low-frequency trim to generate up to $1.5\text{ N}\cdot\text{m}$ continuous vectoring torque, completely isolated from fast rate feedback to prevent phase-lag limit cycle hunting.
