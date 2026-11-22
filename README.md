@@ -136,41 +136,11 @@ To achieve realistic physics simulation without numerical artifacts, our Gazebo 
 
 ## 4. Control Architectures & Stability Innovations
 
-```mermaid
-flowchart TD
-    subgraph Planner["High-Level Planning"]
-        Traj["Septic Minimum-Jerk Trajectory Generator<br/>Pos, Vel, Acc, Jerk = 0 at boundaries"]
-    end
-
-    subgraph Controllers["Control Architectures"]
-        direction TB
-        subgraph NMPC_Box["Controller 2: Full-State SE(3) NMPC (V3)"]
-            NMPC["Optimal Lookahead Horizon (N=20, dt=0.04s)<br/>Multiple Shooting RK4 with CasADi / Ipopt"]
-        end
-        subgraph PID_Box["Controller 1: Cascaded SE(3) PID (V2)"]
-            PID["Position PID + Geometric SO(3) Attitude<br/>Anti-Oscillation Tuning (tau_lead = 15ms)"]
-        end
-    end
-
-    subgraph Allocator["Firmware Allocation: ActuatorEffectivenessVirgo.cpp"]
-        Vec["Authority Decoupling:<br/>Servos: Pure Translation f_d + Filtered Yaw Trim<br/>Motors: Instantaneous Roll/Pitch Diff + Rotor Reaction Yaw"]
-        Cross["Cross-Axis Decoupling:<br/>tau_parasitic = tau_yaw_rotor * proj(alpha, beta)"]
-        LPF["Hardware Filters:<br/>Outer 8.0 Hz (10.0 rad/s) | Inner 5.2 Hz (6.4 rad/s)"]
-    end
-
-    subgraph Hardware["Virgo OMAV Actuators"]
-        Servos["8 Gimbal Servos (DYNAMIXEL XC330 / XL330)"]
-        BLDC["8 BLDC Motors (T-Motor VELOX 3008 1500KV)"]
-    end
-
-    Traj --> NMPC
-    Traj --> PID
-    NMPC --> Allocator
-    PID --> Allocator
-    Allocator --> Vec --> Cross --> LPF
-    LPF --> Servos
-    Cross --> BLDC
-```
+<p align="center">
+  <img src="Virgo_UAV_PID_V2/video/control_architecture_suite.png" width="98%" alt="Virgo OMAV Dual-Controller & Stability Architecture"/>
+  <br/>
+  <em>Figure 6: Complete end-to-end flight control architecture for Virgo OMAV: Septic Minimum-Jerk Trajectory Planning, Dual Selectable Controllers (Full-State SE(3) NMPC & Cascaded Geometric PID), Firmware Decoupled Control Allocation (ActuatorEffectivenessVirgo.cpp), Mechatronic Actuators (BLDC & DYNAMIXEL), and 6-DOF Dynamics.</em>
+</p>
 
 ### 4.1. Core Stability Breakthroughs
 1. **Actuator Authority Separation & Servo Anti-Jitter Decoupling**:
